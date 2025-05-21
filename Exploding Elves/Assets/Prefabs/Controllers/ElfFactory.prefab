@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3041937207600005202
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3041937207600005205}
+  - component: {fileID: 3041937207600005204}
+  m_Layer: 0
+  m_Name: ElfFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3041937207600005205
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3041937207600005202}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3041937207600005204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3041937207600005202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2df0f4bb3b494b1e85cdaa0aa0a19ba0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blackElfPrefab: {fileID: 6255334726218115713, guid: 23c18777fadcdc049ac08c15308cdf3b, type: 3}
+  redElfPrefab: {fileID: 6255334726218115713, guid: ad945e93fc55b974ba3fc255ba34dcb6, type: 3}
+  whiteElfPrefab: {fileID: 6255334726218115713, guid: 095cabcc70834794b867c9e083d4fead, type: 3}
+  blueElfPrefab: {fileID: 6255334726218115713, guid: 3ff6dd08e161cc84faf76f0abffb8fd2, type: 3}
