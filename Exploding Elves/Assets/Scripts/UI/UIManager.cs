@@ -1,4 +1,6 @@
-﻿using Manager;
+﻿using Actors.Enum;
+using AYellowpaper.SerializedCollections;
+using Manager;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -10,6 +12,7 @@ namespace UI
         [System.Serializable]
         public class SpawnerUI
         {
+            public EntityType entityType;
             public string spawnerName;
             public Slider intervalSlider;
             public TMP_Text intervalText;
@@ -18,7 +21,8 @@ namespace UI
     
         [SerializeField] private SpawnerUI[] spawnerUIs;
         [SerializeField] private GameManager gameManager;
-        [SerializeField] private Color[] elfColors; // Matched to EntityType enum order
+        [SerializedDictionary("Entity Type", "Color")]
+        [SerializeField] private SerializedDictionary<EntityType, Color> elfColorDict;
     
         private void Start()
         {
@@ -39,18 +43,19 @@ namespace UI
         
             for (int i = 0; i < spawnerUIs.Length; i++)
             {
+                var spawner = spawnerUIs[i];
                 int spawnerIndex = i;
-                
-                UpdateIntervalText(spawnerUIs[i].intervalText, spawnerUIs[i].intervalSlider.value);
-                
-                if (i < elfColors.Length)
+
+                UpdateIntervalText(spawner.intervalText, spawner.intervalSlider.value);
+
+                if (elfColorDict.TryGetValue(spawner.entityType, out var color))
+                    spawner.colorIndicator.color = color;
+                else
+                    Debug.LogWarning($"No color defined for {spawner.entityType} in UIManager.");
+
+                spawner.intervalSlider.onValueChanged.AddListener((value) =>
                 {
-                    spawnerUIs[i].colorIndicator.color = elfColors[i];
-                }
-                
-                spawnerUIs[i].intervalSlider.onValueChanged.AddListener((value) => 
-                {
-                    UpdateIntervalText(spawnerUIs[spawnerIndex].intervalText, value);
+                    UpdateIntervalText(spawner.intervalText, value);
                     gameManager.SetSpawnerInterval(spawnerIndex, value);
                 });
             }
