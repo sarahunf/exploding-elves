@@ -14,6 +14,7 @@ namespace UI
         {
             public EntityType entityType;
             public string spawnerName;
+            public TMP_Text nameText;
             public Slider intervalSlider;
             public TMP_Text intervalText;
             public Image colorIndicator;
@@ -46,6 +47,7 @@ namespace UI
                 var spawner = spawnerUIs[i];
                 int spawnerIndex = i;
 
+                UpdateNameText(spawner.nameText, spawner.spawnerName);
                 UpdateIntervalText(spawner.intervalText, spawner.intervalSlider.value);
 
                 if (elfColorDict.TryGetValue(spawner.entityType, out var color))
@@ -60,7 +62,12 @@ namespace UI
                 });
             }
         }
-    
+        
+        private void UpdateNameText(TMP_Text text, string value)
+        {
+            text.text = value;
+        }
+
         private void UpdateIntervalText(TMP_Text text, float value)
         {
             text.text = value.ToString("F1") + "s";

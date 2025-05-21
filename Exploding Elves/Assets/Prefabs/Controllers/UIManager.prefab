@@ -44,9 +44,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e25de3d951f4ced9c9bdce5c155729a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnerUIs: []
+  spawnerUIs:
+  - entityType: 1
+    spawnerName: Black
+    nameText: {fileID: 0}
+    intervalSlider: {fileID: 0}
+    intervalText: {fileID: 0}
+    colorIndicator: {fileID: 0}
+  - entityType: 2
+    spawnerName: Red
+    nameText: {fileID: 0}
+    intervalSlider: {fileID: 0}
+    intervalText: {fileID: 0}
+    colorIndicator: {fileID: 0}
+  - entityType: 3
+    spawnerName: White
+    nameText: {fileID: 0}
+    intervalSlider: {fileID: 0}
+    intervalText: {fileID: 0}
+    colorIndicator: {fileID: 0}
+  - entityType: 4
+    spawnerName: White
+    nameText: {fileID: 0}
+    intervalSlider: {fileID: 0}
+    intervalText: {fileID: 0}
+    colorIndicator: {fileID: 0}
   gameManager: {fileID: 0}
-  elfColors: []
   elfColorDict:
     _serializedList:
     - Key: 0
