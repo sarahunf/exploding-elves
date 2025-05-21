@@ -9,9 +9,15 @@ namespace Actors
     public class Elf : Entity
     {
         [SerializeField] private ParticleSystem explosionEffect;
-
-        public static event Action<EntityType, Vector3> OnElfReplication;
+        [SerializeField] private EntityType type;
         
+        public static event Action<EntityType, Vector3> OnElfReplication;
+
+        private void Awake()
+        {
+            entityType = type;
+        }
+
         private void Update()
         {
             Move();

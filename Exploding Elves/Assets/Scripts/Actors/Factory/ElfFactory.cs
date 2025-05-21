@@ -8,10 +8,10 @@ namespace Actors.Factory
     public class ElfFactory : MonoBehaviour, IEntityFactory
     {
         //TODO: replace this for a more scalable approach
-        [SerializeField] private BlackElf blackElfPrefab;
-        [SerializeField] private RedElf redElfPrefab;
-        [SerializeField] private WhiteElf whiteElfPrefab;
-        [SerializeField] private BlueElf blueElfPrefab;
+        [SerializeField] private Elf blackElfPrefab;
+        [SerializeField] private Elf redElfPrefab;
+        [SerializeField] private Elf whiteElfPrefab;
+        [SerializeField] private Elf blueElfPrefab;
     
         public IEntity CreateEntity(EntityType entityType)
         {
