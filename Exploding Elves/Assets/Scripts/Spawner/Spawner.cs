@@ -1,25 +1,20 @@
-﻿using Actors.Enum;
-using Actors.Factory;
+﻿using Actors.Factory;
 using Actors.Factory.Interface;
-using Actors.Interface;
+using Config;
 using Spawner.Interface;
+using UnityEngine;
+using System.Collections;
+using Actors.Enum;
 
 namespace Spawner
 {
-    using UnityEngine;
-    using System.Collections;
-
     public class Spawner : MonoBehaviour, ISpawner
     {
-        [SerializeField] private EntityType entityType;
-        [SerializeField] private float spawnInterval = 2f;
-        [SerializeField] private Vector3 spawnAreaSize = new Vector3(5f, 0, 5f);
+        [SerializeField] private SpawnerConfig config;
         
-        [SerializeField] private int maxEntities = 100;
-        private int currentEntities = 0;
-    
         private IEntityFactory entityFactory;
         private Coroutine spawnCoroutine;
+        private int currentEntities = 0;
     
         private void Awake()
         {
@@ -49,34 +44,44 @@ namespace Spawner
         {
             while (true)
             {
-                SpawnEntity();
-                yield return new WaitForSeconds(spawnInterval);
+                if (currentEntities < config.maxEntities)
+                {
+                    SpawnEntity();
+                }
+                yield return new WaitForSeconds(config.spawnInterval);
             }
         }
-    
-        public void SpawnEntity()
+        
+        private void SpawnEntity()
         {
             if (entityFactory == null) return;
-        
+            
+            var entity = entityFactory.CreateEntity(config.entityType);
+            if (entity == null) return;
+            
             Vector3 randomPosition = transform.position + new Vector3(
-                Random.Range(-spawnAreaSize.x / 2, spawnAreaSize.x / 2),
+                Random.Range(-config.spawnAreaSize.x/2, config.spawnAreaSize.x/2),
                 0,
-                Random.Range(-spawnAreaSize.z / 2, spawnAreaSize.z / 2)
+                Random.Range(-config.spawnAreaSize.z/2, config.spawnAreaSize.z/2)
             );
-        
-            IEntity entity = entityFactory.CreateEntity(entityType);
+            
             entity.Initialize(randomPosition);
+            currentEntities++;
         }
-    
+
         public void SetSpawnInterval(float interval)
         {
-            spawnInterval = Mathf.Max(0.1f, interval);
+            config.spawnInterval = interval;
             StartSpawning();
         }
-    
-        public EntityType GetEntityType()
+        void ISpawner.SpawnEntity()
         {
-            return entityType;
+            SpawnEntity();
+        }
+
+        public void OnEntityDestroyed()
+        {
+            currentEntities--;
         }
     }
 }

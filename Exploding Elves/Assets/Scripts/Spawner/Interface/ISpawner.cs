@@ -6,6 +6,6 @@ namespace Spawner.Interface
     {
         void SetSpawnInterval(float interval);
         void SpawnEntity();
-        EntityType GetEntityType();
+        void OnEntityDestroyed();
     }
 }

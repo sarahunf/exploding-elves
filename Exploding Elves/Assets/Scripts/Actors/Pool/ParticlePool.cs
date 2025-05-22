@@ -27,7 +27,7 @@ namespace Actors.Pool
             }
 
             this.prefab = prefab;
-            this.initialSize = size;
+            initialSize = size;
             
             Debug.Log($"[{gameObject.name}] Initializing particle pool with {initialSize} objects");
             for (int i = 0; i < initialSize; i++)

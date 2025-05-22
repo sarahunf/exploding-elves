@@ -10,55 +10,35 @@ namespace Actors
         [SerializeField] protected float randomDirectionChangeInterval = 2f;
         [SerializeField] protected float boundaryArea = 50f;
     
-        protected Vector3 moveDirection;
+        protected Vector3 currentDirection;
         protected EntityType entityType;
-        protected float directionChangeTimer;
+        protected float nextDirectionChangeTime;
+    
+        public EntityType GetEntityType() => entityType;
     
         public virtual void Initialize(Vector3 position)
         {
             transform.position = position;
-            ChangeDirection();
+            currentDirection = Vector3.zero;
+            nextDirectionChangeTime = 0f;
         }
     
-        public virtual void Move()
+        public virtual void OnCollision(IEntity other)
         {
-            directionChangeTimer -= Time.deltaTime;
-            if (directionChangeTimer <= 0)
-            {
-                ChangeDirection();
-            }
-        
-            transform.position += moveDirection * moveSpeed * Time.deltaTime;
-            
-            Vector3 pos = transform.position;
-        
-            if (Mathf.Abs(pos.x) > boundaryArea || Mathf.Abs(pos.z) > boundaryArea)
-            {
-                moveDirection = -moveDirection;
-                transform.position = new Vector3(
-                    Mathf.Clamp(pos.x, -boundaryArea, boundaryArea),
-                    pos.y,
-                    Mathf.Clamp(pos.z, -boundaryArea, boundaryArea)
-                );
-            }
+            // Base implementation does nothing
         }
+    
+        protected abstract void Move();
     
         protected virtual void ChangeDirection()
         {
-            moveDirection = new Vector3(
+            currentDirection = new Vector3(
                 Random.Range(-1f, 1f),
                 0,
                 Random.Range(-1f, 1f)
             ).normalized;
         
-            directionChangeTimer = randomDirectionChangeInterval;
-        }
-    
-        public abstract void OnCollision(IEntity other);
-    
-        public EntityType GetEntityType()
-        {
-            return entityType;
+            nextDirectionChangeTime = randomDirectionChangeInterval;
         }
     }
 }

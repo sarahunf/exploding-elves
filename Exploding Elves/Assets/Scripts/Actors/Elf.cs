@@ -1,39 +1,37 @@
 ﻿using System.Collections;
 using Actors.Enum;
 using Actors.Interface;
-using Actors.Pool;
+using Config;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using IPool = Actors.Pool.IPool;
+using IPoolable = Actors.Pool.IPoolable;
 
 namespace Actors
 {
     public class Elf : Entity, IPoolable
     {
-        [SerializeField] private ParticleSystem explosionEffect;
-        [SerializeField] private EntityType type;
-        [SerializeField] private ParticlePool explosionPool;
+        [SerializeField] private ElfConfig config;
         
         private IPool pool;
         private bool isExploding = false;
         private bool canReplicate = true;
         private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
         private static float lastCleanupTime = 0f;
-        private const float CLEANUP_INTERVAL = 5f;
         
         public static event Action<EntityType, Vector3> OnElfReplication;
 
         private void Awake()
         {
-            entityType = type;
-            Debug.Log($"[{gameObject.name}] Awake - Type: {type}");
-            explosionPool = FindObjectOfType<ParticlePool>();
+            entityType = config.type;
+            Debug.Log($"[{gameObject.name}] Awake - Type: {config.type}");
         }
 
         private void Update()
         {
             Move();
-            if (Time.time - lastCleanupTime > CLEANUP_INTERVAL)
+            if (Time.time - lastCleanupTime > config.collisionCleanupInterval)
             {
                 processedCollisions.Clear();
                 lastCleanupTime = Time.time;
@@ -45,7 +43,7 @@ namespace Actors
         {
             isExploding = false;
             canReplicate = true;
-            Debug.Log($"[{gameObject.name}] Enabled - Type: {type}");
+            Debug.Log($"[{gameObject.name}] Enabled - Type: {config.type}");
         }
         
         public override void OnCollision(IEntity other)
@@ -83,7 +81,7 @@ namespace Actors
         private IEnumerator ReplicationCooldown()
         {
             canReplicate = false;
-            yield return new WaitForSeconds(20f);
+            yield return new WaitForSeconds(config.replicationCooldown);
             canReplicate = true;
         }
 
@@ -104,24 +102,11 @@ namespace Actors
             isExploding = true;
             Debug.Log($"[{gameObject.name}] Starting explosion");
 
-            if (explosionEffect != null && explosionPool != null)
+            if (config.explosionEffect != null)
             {
-                var explosion = explosionPool.Get();
-                if (explosion != null)
-                {
-                    var ps = explosion.GetComponent<ParticleSystem>();
-                    if (ps != null)
-                    {
-                        explosion.transform.position = transform.position;
-                        ps.Play();
-                        explosionPool.ReturnToPoolAfterDuration(explosion, ps.main.duration);
-                    }
-                    else
-                    {
-                        Debug.LogError($"[{gameObject.name}] Got non-particle system object from explosion pool! Object type: {explosion.GetType()}");
-                        explosionPool.ReturnToPool(explosion);
-                    }
-                }
+                var explosion = Instantiate(config.explosionEffect, transform.position, Quaternion.identity);
+                explosion.Play();
+                Destroy(explosion.gameObject, explosion.main.duration);
             }
             
             StartCoroutine(DelayedReturn());
@@ -164,10 +149,27 @@ namespace Actors
             var component = GetComponent<Collider>();
             if (component != null) component.enabled = true;
         }
+        
         public void ReturnToPool()
         {
             Debug.Log($"[{gameObject.name}] Returning to pool");
             pool?.ReturnToPool(gameObject);
+        }
+        
+        protected override void Move()
+        {
+            if (currentDirection == Vector3.zero || Time.time >= nextDirectionChangeTime)
+            {
+                currentDirection = new Vector3(
+                    UnityEngine.Random.Range(-1f, 1f),
+                    0,
+                    UnityEngine.Random.Range(-1f, 1f)
+                ).normalized;
+                
+                nextDirectionChangeTime = Time.time + config.randomDirectionChangeInterval;
+            }
+            
+            transform.position += currentDirection * (config.moveSpeed * Time.deltaTime);
         }
     }
 }
