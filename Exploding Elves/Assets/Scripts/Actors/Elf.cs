@@ -2,13 +2,12 @@
 using Actors.Enum;
 using Actors.Interface;
 using Actors.Pool;
+using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 namespace Actors
 {
-    using UnityEngine;
-    using System;
-    using System.Collections.Generic;
-
     public class Elf : Entity, IPoolable
     {
         [SerializeField] private ParticleSystem explosionEffect;
@@ -18,7 +17,9 @@ namespace Actors
         private IPool pool;
         private bool isExploding = false;
         private bool canReplicate = true;
-        private static HashSet<(int, int)> processedCollisions = new();
+        private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
+        private static float lastCleanupTime = 0f;
+        private const float CLEANUP_INTERVAL = 5f;
         
         public static event Action<EntityType, Vector3> OnElfReplication;
 
@@ -32,6 +33,12 @@ namespace Actors
         private void Update()
         {
             Move();
+            if (Time.time - lastCleanupTime > CLEANUP_INTERVAL)
+            {
+                processedCollisions.Clear();
+                lastCleanupTime = Time.time;
+                Debug.Log($"[{gameObject.name}] Cleaned up processed collisions HashSet");
+            }
         }
         
         private void OnEnable()
@@ -83,7 +90,11 @@ namespace Actors
         private IEnumerator RemoveCollisionId((int, int) collisionId)
         {
             yield return new WaitForSeconds(0.1f);
-            processedCollisions.Remove(collisionId);
+            if (processedCollisions.Contains(collisionId))
+            {
+                processedCollisions.Remove(collisionId);
+                Debug.Log($"[{gameObject.name}] Removed collision ID from processed collisions");
+            }
         }
 
         private void Explode()
@@ -130,13 +141,22 @@ namespace Actors
         private void OnTriggerEnter(Collider other)
         {
             var otherElf = other.GetComponent<Elf>();
+            if (otherElf == null)
+            {
+                otherElf = other.GetComponentInParent<Elf>();
+            }
+            
             if (otherElf != null)
             {
+                Debug.Log($"[{gameObject.name}] Trigger entered with {otherElf.gameObject.name}");
                 OnCollision(otherElf);
+            }
+            else
+            {
+                Debug.LogWarning($"[{gameObject.name}] Trigger entered with object that has no Elf component: {other.gameObject.name}");
             }
         }
         
-
         public void SetPool(IPool pool)
         {
             Debug.Log($"[{gameObject.name}] Setting pool reference");
