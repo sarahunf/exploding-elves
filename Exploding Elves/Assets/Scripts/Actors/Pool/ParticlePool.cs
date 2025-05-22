@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +35,18 @@ namespace Actors.Pool
                 AddToPool(CreateNew());
             }
         }
+        
+        private void Awake()
+        {
+            if (prefab != null)
+            {
+                Debug.Log($"[{gameObject.name}] Initializing pool with {initialSize} objects");
+                for (int i = 0; i < initialSize; i++)
+                {
+                    AddToPool(CreateNew());
+                }
+            }
+        }
 
         private GameObject CreateNew()
         {
@@ -61,16 +74,28 @@ namespace Actors.Pool
         {
             if (obj == null) return;
 
-            var particleSystem = obj.GetComponent<ParticleSystem>();
-            if (particleSystem != null)
+            var ps = obj.GetComponent<ParticleSystem>();
+            if (ps != null)
             {
-                particleSystem.Stop();
-                particleSystem.Clear();
+                ps.Stop();
+                ps.Clear();
             }
 
             Debug.Log($"[{gameObject.name}] Returning particle effect to pool. Current size: {pool.Count}");
             obj.SetActive(false);
             pool.Enqueue(obj);
+        }
+
+        public void ReturnToPoolAfterDuration(GameObject obj, float duration)
+        {
+            if (obj == null) return;
+            StartCoroutine(ReturnToPoolAfterDelay(obj, duration));
+        }
+
+        private IEnumerator ReturnToPoolAfterDelay(GameObject obj, float duration)
+        {
+            yield return new WaitForSeconds(duration);
+            ReturnToPool(obj);
         }
 
         private void AddToPool(GameObject obj)

@@ -52,8 +52,7 @@ namespace Actors
             int id2 = otherElf.gameObject.GetInstanceID();
             var collisionId = (Mathf.Min(id1, id2), Mathf.Max(id1, id2));
             
-            if (processedCollisions.Contains(collisionId)) return;
-            processedCollisions.Add(collisionId);
+            if (!processedCollisions.Add(collisionId)) return;
 
             Debug.Log($"[{gameObject.name}] Processing collision with {other.GetEntityType()}");
             
@@ -90,6 +89,7 @@ namespace Actors
         private void Explode()
         {
             if (isExploding) return;
+            
             isExploding = true;
             Debug.Log($"[{gameObject.name}] Starting explosion");
 
@@ -98,12 +98,12 @@ namespace Actors
                 var explosion = explosionPool.Get();
                 if (explosion != null)
                 {
-                    var particleSystem = explosion.GetComponent<ParticleSystem>();
-                    if (particleSystem != null)
+                    var ps = explosion.GetComponent<ParticleSystem>();
+                    if (ps != null)
                     {
                         explosion.transform.position = transform.position;
-                        particleSystem.Play();
-                        StartCoroutine(ReturnExplosionToPool(explosion, particleSystem.main.duration));
+                        ps.Play();
+                        explosionPool.ReturnToPoolAfterDuration(explosion, ps.main.duration);
                     }
                     else
                     {
@@ -114,12 +114,6 @@ namespace Actors
             }
             
             StartCoroutine(DelayedReturn());
-        }
-
-        private IEnumerator ReturnExplosionToPool(GameObject explosion, float duration)
-        {
-            yield return new WaitForSeconds(duration);
-            explosionPool.ReturnToPool(explosion);
         }
 
         public IEnumerator DelayedReturn()

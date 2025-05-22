@@ -15,6 +15,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Explosion
       objectReference: {fileID: 0}
+    - target: {fileID: 7248764271770939663, guid: bb66f05343161104994b4822b322c55c, type: 3}
+      propertyPath: lengthInSec
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8006212391110340050, guid: bb66f05343161104994b4822b322c55c, type: 3}
       propertyPath: type
       value: 3
