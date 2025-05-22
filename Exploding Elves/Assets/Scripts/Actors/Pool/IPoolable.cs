@@ -1,8 +1,10 @@
-﻿namespace Actors.Pool
+﻿using UnityEngine;
+
+namespace Actors.Pool
 {
     public interface IPoolable
     {
-        void SetPool(EntityPool pool);
+        void SetPool(IPool pool);
         void ReturnToPool();
     }
 }

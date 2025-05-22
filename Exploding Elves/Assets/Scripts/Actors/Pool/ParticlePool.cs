@@ -1,0 +1,81 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Actors.Pool
+{
+    public class ParticlePool : MonoBehaviour, IPool
+    {
+        [SerializeField] private GameObject prefab;
+        [SerializeField] private int initialSize = 10;
+
+        private readonly Queue<GameObject> pool = new();
+
+        public void Initialize(GameObject prefab, int size)
+        {
+            if (prefab == null)
+            {
+                Debug.LogError($"[{gameObject.name}] Cannot initialize pool with null prefab!");
+                return;
+            }
+
+            var particleSystem = prefab.GetComponent<ParticleSystem>();
+            if (particleSystem == null)
+            {
+                Debug.LogError($"[{gameObject.name}] Prefab must have a ParticleSystem component!");
+                return;
+            }
+
+            this.prefab = prefab;
+            this.initialSize = size;
+            
+            Debug.Log($"[{gameObject.name}] Initializing particle pool with {initialSize} objects");
+            for (int i = 0; i < initialSize; i++)
+            {
+                AddToPool(CreateNew());
+            }
+        }
+
+        private GameObject CreateNew()
+        {
+            Debug.Log($"[{gameObject.name}] Creating new particle effect in pool");
+            GameObject go = Instantiate(prefab, transform);
+            go.SetActive(false);
+            return go;
+        }
+
+        public GameObject Get()
+        {
+            if (pool.Count == 0)
+            {
+                Debug.LogWarning($"[{gameObject.name}] Particle pool is empty! Creating new object");
+                AddToPool(CreateNew());
+            }
+
+            var obj = pool.Dequeue();
+            Debug.Log($"[{gameObject.name}] Getting particle effect from pool. Remaining: {pool.Count}");
+            obj.SetActive(true);
+            return obj;
+        }
+
+        public void ReturnToPool(GameObject obj)
+        {
+            if (obj == null) return;
+
+            var particleSystem = obj.GetComponent<ParticleSystem>();
+            if (particleSystem != null)
+            {
+                particleSystem.Stop();
+                particleSystem.Clear();
+            }
+
+            Debug.Log($"[{gameObject.name}] Returning particle effect to pool. Current size: {pool.Count}");
+            obj.SetActive(false);
+            pool.Enqueue(obj);
+        }
+
+        private void AddToPool(GameObject obj)
+        {
+            pool.Enqueue(obj);
+        }
+    }
+} 

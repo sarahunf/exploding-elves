@@ -13,10 +13,10 @@ namespace Actors
     {
         [SerializeField] private ParticleSystem explosionEffect;
         [SerializeField] private EntityType type;
+        [SerializeField] private ParticlePool explosionPool;
         
-        private EntityPool pool;
+        private IPool pool;
         private bool isExploding = false;
-        private static EntityPool explosionPool;
         private static HashSet<(int, int)> processedCollisions = new();
         
         public static event Action<EntityType, Vector3> OnElfReplication;
@@ -25,13 +25,7 @@ namespace Actors
         {
             entityType = type;
             Debug.Log($"[{gameObject.name}] Awake - Type: {type}");
-            
-            if (explosionPool == null && explosionEffect != null)
-            {
-                var poolObj = new GameObject("ExplosionPool");
-                explosionPool = poolObj.AddComponent<EntityPool>();
-                explosionPool.Initialize(explosionEffect.gameObject, 10);
-            }
+            explosionPool = FindObjectOfType<ParticlePool>();
         }
 
         private void Update()
@@ -66,6 +60,7 @@ namespace Actors
             if (other.GetEntityType() == entityType)
             {
                 Debug.Log($"[{gameObject.name}] Same type collision - triggering replication");
+                // Trigger replication event to create a new elf
                 OnElfReplication?.Invoke(entityType, transform.position);
                 // Return both elves to pool after replication
                 StartCoroutine(DelayedReturn());
@@ -74,10 +69,10 @@ namespace Actors
             else
             {
                 Debug.Log($"[{gameObject.name}] Different type collision - exploding");
+                // Both elves should explode
                 Explode();
                 otherElf.Explode();
             }
-            
 
             // Remove the collision ID after a short delay
             StartCoroutine(RemoveCollisionId(collisionId));
@@ -98,15 +93,24 @@ namespace Actors
             if (explosionEffect != null && explosionPool != null)
             {
                 var explosion = explosionPool.Get();
-                explosion.transform.position = transform.position;
-                var particleSystem = explosion.GetComponent<ParticleSystem>();
-                if (particleSystem != null)
+                if (explosion != null)
                 {
-                    particleSystem.Play();
-                    StartCoroutine(ReturnExplosionToPool(explosion, particleSystem.main.duration));
+                    var particleSystem = explosion.GetComponent<ParticleSystem>();
+                    if (particleSystem != null)
+                    {
+                        explosion.transform.position = transform.position;
+                        particleSystem.Play();
+                        StartCoroutine(ReturnExplosionToPool(explosion, particleSystem.main.duration));
+                    }
+                    else
+                    {
+                        Debug.LogError($"[{gameObject.name}] Got non-particle system object from explosion pool! Object type: {explosion.GetType()}");
+                        explosionPool.ReturnToPool(explosion);
+                    }
                 }
             }
 
+            // Return to pool after a short delay to allow explosion effect to be visible
             StartCoroutine(DelayedReturn());
         }
 
@@ -121,8 +125,10 @@ namespace Actors
             Debug.Log($"[{gameObject.name}] Delayed return to pool");
             var component = GetComponent<Collider>();
             if (component != null) component.enabled = false;
-            yield return null;
-
+            
+            // Add a small delay before returning to pool
+            yield return new WaitForSeconds(0.1f);
+            
             ReturnToPool();
         }
 
@@ -134,15 +140,15 @@ namespace Actors
                 OnCollision(otherElf);
             }
         }
+        
 
-        public void SetPool(EntityPool pool)
+        public void SetPool(IPool pool)
         {
             Debug.Log($"[{gameObject.name}] Setting pool reference");
             this.pool = pool;
             var component = GetComponent<Collider>();
             if (component != null) component.enabled = true;
         }
-
         public void ReturnToPool()
         {
             Debug.Log($"[{gameObject.name}] Returning to pool");

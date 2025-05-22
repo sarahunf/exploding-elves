@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Actors.Interface;
 
 namespace Actors.Pool
 {
-    public class EntityPool : MonoBehaviour
+    public class EntityPool : MonoBehaviour, IPool
     {
         [SerializeField] private GameObject prefab;
         [SerializeField] private int initialSize = 10;
