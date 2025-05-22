@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Actors.Interface;
 
 namespace Actors.Pool
 {

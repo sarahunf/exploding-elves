@@ -1,7 +1,6 @@
 using Actors.Enum;
 using UnityEngine;
 
-// Main entity interface
 namespace Actors.Interface
 {
     public interface IEntity

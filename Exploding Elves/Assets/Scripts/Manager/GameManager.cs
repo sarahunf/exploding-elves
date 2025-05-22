@@ -2,6 +2,7 @@
 using Actors.Enum;
 using Actors.Factory;
 using UnityEngine;
+
 namespace Manager
 {
     public class GameManager : MonoBehaviour
@@ -23,8 +24,14 @@ namespace Manager
             var factory = FindObjectOfType<ElfFactory>();
             if (factory == null) return;
             
+            Vector3 offset = new Vector3(
+                Random.Range(-1f, 1f),
+                0,
+                Random.Range(-1f, 1f)
+            ).normalized * 5f;
+            
             var newElf = factory.CreateEntity(entityType);
-            newElf.Initialize(position);
+            newElf.Initialize(position + offset);
         }
     
         public void SetSpawnerInterval(int spawnerIndex, float interval)
@@ -35,5 +42,4 @@ namespace Manager
             }
         }
     }
-
 }

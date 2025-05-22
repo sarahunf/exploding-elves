@@ -8,6 +8,7 @@ namespace Actors
     {
         [SerializeField] protected float moveSpeed = 2f;
         [SerializeField] protected float randomDirectionChangeInterval = 2f;
+        [SerializeField] protected float boundaryArea = 50f;
     
         protected Vector3 moveDirection;
         protected EntityType entityType;
@@ -28,18 +29,16 @@ namespace Actors
             }
         
             transform.position += moveDirection * moveSpeed * Time.deltaTime;
-        
-            // Keep within bounds (simple boundary check)
+            
             Vector3 pos = transform.position;
-            float boundary = 10f; // Assuming a 10x10 play area
         
-            if (Mathf.Abs(pos.x) > boundary || Mathf.Abs(pos.z) > boundary)
+            if (Mathf.Abs(pos.x) > boundaryArea || Mathf.Abs(pos.z) > boundaryArea)
             {
-                moveDirection = -moveDirection; // Bounce off the boundary
+                moveDirection = -moveDirection;
                 transform.position = new Vector3(
-                    Mathf.Clamp(pos.x, -boundary, boundary),
+                    Mathf.Clamp(pos.x, -boundaryArea, boundaryArea),
                     pos.y,
-                    Mathf.Clamp(pos.z, -boundary, boundary)
+                    Mathf.Clamp(pos.z, -boundaryArea, boundaryArea)
                 );
             }
         }
@@ -47,9 +46,9 @@ namespace Actors
         protected virtual void ChangeDirection()
         {
             moveDirection = new Vector3(
-                UnityEngine.Random.Range(-1f, 1f),
+                Random.Range(-1f, 1f),
                 0,
-                UnityEngine.Random.Range(-1f, 1f)
+                Random.Range(-1f, 1f)
             ).normalized;
         
             directionChangeTimer = randomDirectionChangeInterval;

@@ -17,6 +17,7 @@ namespace Actors
         
         private IPool pool;
         private bool isExploding = false;
+        private bool canReplicate = true;
         private static HashSet<(int, int)> processedCollisions = new();
         
         public static event Action<EntityType, Vector3> OnElfReplication;
@@ -36,22 +37,21 @@ namespace Actors
         private void OnEnable()
         {
             isExploding = false;
+            canReplicate = true;
             Debug.Log($"[{gameObject.name}] Enabled - Type: {type}");
         }
         
         public override void OnCollision(IEntity other)
         {
-            if (isExploding) return;
+            if (isExploding || !canReplicate) return;
 
             var otherElf = other as Elf;
             if (otherElf == null) return;
-
-            // Create a unique collision ID using the instance IDs
+            
             int id1 = gameObject.GetInstanceID();
             int id2 = otherElf.gameObject.GetInstanceID();
             var collisionId = (Mathf.Min(id1, id2), Mathf.Max(id1, id2));
-
-            // Skip if this collision was already processed
+            
             if (processedCollisions.Contains(collisionId)) return;
             processedCollisions.Add(collisionId);
 
@@ -60,22 +60,25 @@ namespace Actors
             if (other.GetEntityType() == entityType)
             {
                 Debug.Log($"[{gameObject.name}] Same type collision - triggering replication");
-                // Trigger replication event to create a new elf
                 OnElfReplication?.Invoke(entityType, transform.position);
-                // Return both elves to pool after replication
-                StartCoroutine(DelayedReturn());
-                otherElf.StartCoroutine(otherElf.DelayedReturn());
+                
+                StartCoroutine(ReplicationCooldown());
+                otherElf.StartCoroutine(otherElf.ReplicationCooldown());
             }
             else
             {
                 Debug.Log($"[{gameObject.name}] Different type collision - exploding");
-                // Both elves should explode
                 Explode();
                 otherElf.Explode();
             }
-
-            // Remove the collision ID after a short delay
             StartCoroutine(RemoveCollisionId(collisionId));
+        }
+
+        private IEnumerator ReplicationCooldown()
+        {
+            canReplicate = false;
+            yield return new WaitForSeconds(20f);
+            canReplicate = true;
         }
 
         private IEnumerator RemoveCollisionId((int, int) collisionId)
@@ -109,8 +112,7 @@ namespace Actors
                     }
                 }
             }
-
-            // Return to pool after a short delay to allow explosion effect to be visible
+            
             StartCoroutine(DelayedReturn());
         }
 
@@ -126,7 +128,6 @@ namespace Actors
             var component = GetComponent<Collider>();
             if (component != null) component.enabled = false;
             
-            // Add a small delay before returning to pool
             yield return new WaitForSeconds(0.1f);
             
             ReturnToPool();
