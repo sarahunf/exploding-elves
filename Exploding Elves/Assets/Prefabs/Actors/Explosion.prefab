@@ -10,14 +10,14 @@ PrefabInstance:
     - target: {fileID: 1220671450367771087, guid: bb66f05343161104994b4822b322c55c, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 4937e995524e0f04b851c55653781f20, type: 2}
+      objectReference: {fileID: 2100000, guid: 4dc92502bdf5c974f879e32244c5ae8e, type: 2}
     - target: {fileID: 6021987723304765930, guid: bb66f05343161104994b4822b322c55c, type: 3}
       propertyPath: m_Name
-      value: ElfBlue
+      value: Explosion
       objectReference: {fileID: 0}
     - target: {fileID: 8006212391110340050, guid: bb66f05343161104994b4822b322c55c, type: 3}
       propertyPath: type
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8636141418293635756, guid: bb66f05343161104994b4822b322c55c, type: 3}
       propertyPath: m_RootOrder
@@ -63,5 +63,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3197187093432742725, guid: bb66f05343161104994b4822b322c55c, type: 3}
+    - {fileID: 4412407418125474992, guid: bb66f05343161104994b4822b322c55c, type: 3}
+    - {fileID: 8006212391110340050, guid: bb66f05343161104994b4822b322c55c, type: 3}
+    - {fileID: 1220671450367771087, guid: bb66f05343161104994b4822b322c55c, type: 3}
+    - {fileID: 6598786246761635040, guid: bb66f05343161104994b4822b322c55c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: bb66f05343161104994b4822b322c55c, type: 3}

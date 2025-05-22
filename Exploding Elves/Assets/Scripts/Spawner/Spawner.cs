@@ -3,6 +3,7 @@ using Actors.Factory;
 using Actors.Factory.Interface;
 using Actors.Interface;
 using Spawner.Interface;
+
 namespace Spawner
 {
     using UnityEngine;
@@ -13,6 +14,9 @@ namespace Spawner
         [SerializeField] private EntityType entityType;
         [SerializeField] private float spawnInterval = 2f;
         [SerializeField] private Vector3 spawnAreaSize = new Vector3(5f, 0, 5f);
+        
+        [SerializeField] private int maxEntities = 100;
+        private int currentEntities = 0;
     
         private IEntityFactory entityFactory;
         private Coroutine spawnCoroutine;
