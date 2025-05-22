@@ -13,5 +13,9 @@ namespace Config
         
         [Header("Limit Settings")]
         public int maxEntities = 100;
+        
+        [Header("UI Settings")]
+        public string spawnerName;
+        public Color indicatorColor = Color.white;
     }
 } 

@@ -1,5 +1,5 @@
 ﻿using Actors.Enum;
-using AYellowpaper.SerializedCollections;
+using Config;
 using Manager;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,8 +12,7 @@ namespace UI
         [System.Serializable]
         public class SpawnerUI
         {
-            public EntityType entityType;
-            public string spawnerName;
+            public SpawnerConfig config;
             public TMP_Text nameText;
             public Slider intervalSlider;
             public TMP_Text intervalText;
@@ -22,8 +21,6 @@ namespace UI
     
         [SerializeField] private SpawnerUI[] spawnerUIs;
         [SerializeField] private GameManager gameManager;
-        [SerializedDictionary("Entity Type", "Color")]
-        [SerializeField] private SerializedDictionary<EntityType, Color> elfColorDict;
     
         private void Start()
         {
@@ -44,33 +41,41 @@ namespace UI
         
             for (int i = 0; i < spawnerUIs.Length; i++)
             {
-                var spawner = spawnerUIs[i];
-                int spawnerIndex = i;
+                var ui = spawnerUIs[i];
+                if (ui.config == null) continue;
 
-                UpdateNameText(spawner.nameText, spawner.spawnerName);
-                UpdateIntervalText(spawner.intervalText, spawner.intervalSlider.value);
-
-                if (elfColorDict.TryGetValue(spawner.entityType, out var color))
-                    spawner.colorIndicator.color = color;
-                else
-                    Debug.LogWarning($"No color defined for {spawner.entityType} in UIManager.");
-
-                spawner.intervalSlider.onValueChanged.AddListener((value) =>
+                // Set name
+                if (ui.nameText != null)
                 {
-                    UpdateIntervalText(spawner.intervalText, value);
-                    gameManager.SetSpawnerInterval(spawnerIndex, value);
-                });
-            }
-        }
-        
-        private void UpdateNameText(TMP_Text text, string value)
-        {
-            text.text = value;
-        }
+                    ui.nameText.text = ui.config.spawnerName;
+                }
 
-        private void UpdateIntervalText(TMP_Text text, float value)
-        {
-            text.text = value.ToString("F1") + "s";
+                // Set color indicator
+                if (ui.colorIndicator != null)
+                {
+                    ui.colorIndicator.color = ui.config.indicatorColor;
+                }
+
+                // Set up interval slider
+                if (ui.intervalSlider != null)
+                {
+                    ui.intervalSlider.value = ui.config.spawnInterval;
+                    if (ui.intervalText != null)
+                    {
+                        ui.intervalText.text = ui.config.spawnInterval.ToString("F1");
+                    }
+
+                    int spawnerIndex = i; // Capture for lambda
+                    ui.intervalSlider.onValueChanged.AddListener((value) =>
+                    {
+                        gameManager.SetSpawnerInterval(spawnerIndex, value);
+                        if (ui.intervalText != null)
+                        {
+                            ui.intervalText.text = value.ToString("F1");
+                        }
+                    });
+                }
+            }
         }
     }
 }

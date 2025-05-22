@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2df0f4bb3b494b1e85cdaa0aa0a19ba0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blackElfPrefab: {fileID: 6255334726218115713, guid: 23c18777fadcdc049ac08c15308cdf3b, type: 3}
-  redElfPrefab: {fileID: 6255334726218115713, guid: ad945e93fc55b974ba3fc255ba34dcb6, type: 3}
-  whiteElfPrefab: {fileID: 6255334726218115713, guid: 095cabcc70834794b867c9e083d4fead, type: 3}
-  blueElfPrefab: {fileID: 6255334726218115713, guid: 3ff6dd08e161cc84faf76f0abffb8fd2, type: 3}
+  blackElfPool: {fileID: 0}
+  redElfPool: {fileID: 0}
+  whiteElfPool: {fileID: 0}
+  blueElfPool: {fileID: 0}

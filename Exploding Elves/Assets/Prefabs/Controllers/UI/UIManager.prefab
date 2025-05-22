@@ -45,40 +45,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnerUIs:
-  - entityType: 1
-    spawnerName: Black
+  - config: {fileID: 11400000, guid: 9fe35ff1d9beba44f86b04c17384b046, type: 2}
     nameText: {fileID: 0}
     intervalSlider: {fileID: 0}
     intervalText: {fileID: 0}
     colorIndicator: {fileID: 0}
-  - entityType: 2
-    spawnerName: Red
+  - config: {fileID: 11400000, guid: 92bbd23dea7265b43a0fdcf9c0048e60, type: 2}
     nameText: {fileID: 0}
     intervalSlider: {fileID: 0}
     intervalText: {fileID: 0}
     colorIndicator: {fileID: 0}
-  - entityType: 3
-    spawnerName: White
+  - config: {fileID: 11400000, guid: 2c819e489ae26344da74a74e4fbf67fa, type: 2}
     nameText: {fileID: 0}
     intervalSlider: {fileID: 0}
     intervalText: {fileID: 0}
     colorIndicator: {fileID: 0}
-  - entityType: 4
-    spawnerName: White
+  - config: {fileID: 11400000, guid: a6607e4e4cc0b2746a1e553029efbe48, type: 2}
     nameText: {fileID: 0}
     intervalSlider: {fileID: 0}
     intervalText: {fileID: 0}
     colorIndicator: {fileID: 0}
   gameManager: {fileID: 0}
-  elfColorDict:
-    _serializedList:
-    - Key: 0
-      Value: {r: 1, g: 0, b: 0.92530394, a: 1}
-    - Key: 1
-      Value: {r: 0, g: 0, b: 0, a: 1}
-    - Key: 2
-      Value: {r: 1, g: 0, b: 0.035849094, a: 1}
-    - Key: 4
-      Value: {r: 0, g: 0.7671809, b: 1, a: 1}
-    - Key: 3
-      Value: {r: 1, g: 1, b: 1, a: 1}

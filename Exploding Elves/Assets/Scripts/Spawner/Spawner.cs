@@ -4,7 +4,6 @@ using Config;
 using Spawner.Interface;
 using UnityEngine;
 using System.Collections;
-using Actors.Enum;
 
 namespace Spawner
 {

@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: SpawnerConfig_White
   m_EditorClassIdentifier: 
   entityType: 3
-  spawnInterval: 2
+  spawnInterval: 5
   spawnAreaSize: {x: 5, y: 0, z: 5}
-  maxEntities: 100
+  maxEntities: 30
+  spawnerName: White
+  indicatorColor: {r: 1, g: 1, b: 1, a: 1}
