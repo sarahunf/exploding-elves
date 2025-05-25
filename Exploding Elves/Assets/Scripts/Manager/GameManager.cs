@@ -65,23 +65,29 @@ namespace Manager
             var factory = FindObjectOfType<ElfFactory>();
             if (factory == null) return;
             
-            Vector3 offset = new Vector3(
-                Random.Range(-1f, 1f),
-                0,
-                Random.Range(-1f, 1f)
-            ).normalized * 5f;
-            
             var newElf = factory.CreateEntity(entityType);
-            Vector3 spawnPosition = position + offset;
-            newElf.Initialize(spawnPosition);
-            
-            // Show spawn effect
-            if (newElf is Elf elf)
+            if (newElf == null) return;
+
+            var spawnPosition = Spawner.Spawner.GetValidSpawnPosition(position, 5f);
+            if (spawnPosition.HasValue)
             {
-                elf.ShowSpawnEffect(spawnPosition);
+                newElf.Initialize(spawnPosition.Value);
+                
+                // Show spawn effect
+                if (newElf is Elf elf)
+                {
+                    elf.ShowSpawnEffect(spawnPosition.Value);
+                }
+                
+                EntityCounter.Instance.OnEntitySpawned(entityType);
             }
-            
-            EntityCounter.Instance.OnEntitySpawned(entityType);
+            else
+            {
+                if (newElf is MonoBehaviour entityMono)
+                {
+                    Destroy(entityMono.gameObject);
+                }
+            }
         }
     
         public void SetSpawnerInterval(int spawnerIndex, float interval)

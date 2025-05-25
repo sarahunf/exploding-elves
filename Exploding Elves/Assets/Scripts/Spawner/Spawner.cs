@@ -18,12 +18,54 @@ namespace Spawner
     
         public static event System.Action<EntityType> OnEntitySpawned;
     
+        public static Vector3? GetValidSpawnPosition(Vector3 basePosition, float areaSize)
+        {
+            int maxAttempts = 10;
+            int attempts = 0;
+            
+            do
+            {
+                var randomPosition = basePosition + new Vector3(
+                    Random.Range(-areaSize/2, areaSize/2),
+                    0,
+                    Random.Range(-areaSize/2, areaSize/2)
+                );
+                
+                RaycastHit hit;
+                Vector3 rayStart = randomPosition + Vector3.up * 100f;
+                
+                if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f) && hit.collider.CompareTag("Ground"))
+                {
+                    randomPosition.y = hit.point.y + 0.05f;
+
+                    float checkRadius = 0.5f;
+                    Collider[] colliders = Physics.OverlapSphere(randomPosition, checkRadius);
+                    bool rockNearby = false;
+                    foreach (var col in colliders)
+                    {
+                        if (col.CompareTag("Rock"))
+                        {
+                            rockNearby = true;
+                            break;
+                        }
+                    }
+                    if (!rockNearby)
+                    {
+                        return randomPosition;
+                    }
+                }
+                
+                attempts++;
+            } while (attempts < maxAttempts);
+            
+            return null;
+        }
+    
         private void Awake()
         {
             entityFactory = FindObjectOfType<ElfFactory>();
             if (entityFactory == null)
             {
-                Debug.LogError("ElfFactory not found in the scene!");
                 return;
             }
         }
@@ -60,67 +102,15 @@ namespace Spawner
             var entity = entityFactory?.CreateEntity(config.entityType);
             if (entity == null)
             {
-                Debug.LogError("[Spawner] Failed to create entity - entityFactory returned null");
                 return;
             }
             
-            int maxAttempts = 10; // Prevent infinite loop
-            int attempts = 0;
+            var spawnPosition = GetValidSpawnPosition(transform.position, config.spawnAreaSize.x);
+            if (!spawnPosition.HasValue) return;
             
-            do
-            {
-                var randomPosition = transform.position + new Vector3(
-                    Random.Range(-config.spawnAreaSize.x/2, config.spawnAreaSize.x/2),
-                    0,
-                    Random.Range(-config.spawnAreaSize.z/2, config.spawnAreaSize.z/2)
-                );
-                
-                RaycastHit hit;
-                Vector3 rayStart = randomPosition + Vector3.up * 100f;
-                Vector3 rayEnd = rayStart + Vector3.down * 200f;
-                
-                Debug.DrawRay(rayStart, Vector3.down * 200f, Color.red, 1f);
-                
-                if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f) && hit.collider.CompareTag("Ground"))
-                {
-                    randomPosition.y = hit.point.y + 0.05f;
-
-                    float checkRadius = 0.5f;
-                    Collider[] colliders = Physics.OverlapSphere(randomPosition, checkRadius);
-                    bool rockNearby = false;
-                    foreach (var col in colliders)
-                    {
-                        if (col.CompareTag("Rock"))
-                        {
-                            rockNearby = true;
-                            break;
-                        }
-                    }
-                    if (rockNearby)
-                    {
-                        attempts++;
-                        continue;
-                    }
-
-                    entity.Initialize(randomPosition);
-                    EntityCounter.Instance.OnEntitySpawned(config.entityType);
-                    OnEntitySpawned?.Invoke(config.entityType);
-                    return;
-                }
-                
-                attempts++;
-            } while (attempts < maxAttempts);
-            
-            if (attempts >= maxAttempts)
-            {
-                Debug.LogWarning($"[Spawner] Could not find valid spawn position within ground collider after {maxAttempts} attempts");
-                return;
-            }
-            
-            if (entity is MonoBehaviour entityMono)
-            {
-                Destroy(entityMono.gameObject);
-            }
+            entity.Initialize(spawnPosition.Value);
+            EntityCounter.Instance.OnEntitySpawned(config.entityType);
+            OnEntitySpawned?.Invoke(config.entityType);
         }
 
         public void SetSpawnInterval(float interval)

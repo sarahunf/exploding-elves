@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Actors.Enum;
+using UnityEngine;
 
 namespace Manager
 {
@@ -27,7 +28,9 @@ namespace Manager
         public void OnEntityDestroyed(EntityType type)
         {
             if (!entityCounts.ContainsKey(type))
+            {
                 return;
+            }
             
             entityCounts[type]--;
             if (entityCounts[type] < 0)

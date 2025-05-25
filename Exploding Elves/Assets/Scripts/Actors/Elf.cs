@@ -140,14 +140,9 @@ namespace Actors
                     particleSystem.Play();
                     explosionPool.ReturnToPoolAfterDuration(explosion, (particleSystem.main.duration + particleSystem.main.startDelay.constant) + 0.2f);
                 }
-                else
-                {
-                    Debug.LogError($"[ELF_DEBUG] [{gameObject.name}] No ParticleSystem component found on explosion prefab");
-                }
             }
             
             if (view != null) {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] | animation");
                 view.AttackAndDestroy(OnAttackFinished);
             } else {
                 StartCoroutine(DelayedReturn());
@@ -162,9 +157,17 @@ namespace Actors
         {
             yield return new WaitForSeconds(0.1f);
             
-            Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
-            OnEntityDestroyed?.Invoke(entityType);
-            ReturnToPool();
+            if (isExploding)  // Prevent multiple returns
+            {
+                Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
+                OnEntityDestroyed?.Invoke(entityType);
+                
+                // Reset state before returning to pool
+                isExploding = false;
+                canReplicate = true;
+                
+                ReturnToPool();
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -202,7 +205,10 @@ namespace Actors
         
         public void ReturnToPool()
         {
-            pool?.ReturnToPool(gameObject);
+            if (pool != null)
+            {
+                pool.ReturnToPool(gameObject);
+            }
         }
         
         protected override void Move()

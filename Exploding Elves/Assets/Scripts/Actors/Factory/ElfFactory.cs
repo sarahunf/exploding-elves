@@ -32,7 +32,6 @@ namespace Actors.Factory
         {
             if (!poolMap.TryGetValue(entityType, out var pool))
             {
-                Debug.LogError($"[ElfFactory] No pool found for {entityType}");
                 return null;
             }
 

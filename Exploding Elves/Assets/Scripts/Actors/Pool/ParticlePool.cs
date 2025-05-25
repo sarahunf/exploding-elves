@@ -15,13 +15,11 @@ namespace Actors.Pool
         {
             if (prefab == null)
             {
-                Debug.LogError($"[{gameObject.name}] Cannot initialize pool with null prefab!");
                 return;
             }
 
             if (prefab.GetComponent<ParticleSystem>() == null)
             {
-                Debug.LogError($"[{gameObject.name}] Prefab must have a ParticleSystem component!");
                 return;
             }
 
@@ -56,7 +54,6 @@ namespace Actors.Pool
         {
             if (pool.Count == 0)
             {
-                Debug.LogWarning($"[{gameObject.name}] Particle pool is empty! Creating new object");
                 return CreateNew();
             }
 

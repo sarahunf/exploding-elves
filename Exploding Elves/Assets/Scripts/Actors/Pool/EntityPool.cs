@@ -36,8 +36,11 @@ namespace Actors.Pool
         {
             GameObject go = Instantiate(prefab, transform);
             go.SetActive(false);
-            go.GetComponent<IPoolable>()?.SetPool(this);
-            go.SetActive(true);
+            var poolable = go.GetComponent<IPoolable>();
+            if (poolable != null)
+            {
+                poolable.SetPool(this);
+            }
             return go;
         }
 
@@ -45,8 +48,9 @@ namespace Actors.Pool
         {
             if (pool.Count == 0)
             {
-                Debug.LogWarning($"[{gameObject.name}] Pool is empty! Creating new object");
-                return CreateNew();
+                var newObj = CreateNew();
+                newObj.SetActive(true);
+                return newObj;
             }
 
             var obj = pool.Dequeue();
@@ -56,12 +60,15 @@ namespace Actors.Pool
 
         public void ReturnToPool(GameObject obj)
         {
+            if (obj == null) return;
+            
             obj.SetActive(false);
             pool.Enqueue(obj);
         }
 
         private void AddToPool(GameObject obj)
         {
+            if (obj == null) return;
             pool.Enqueue(obj);
         }
     }

@@ -24,6 +24,15 @@ namespace UI
         [SerializeField] private SpawnerUI[] spawnerUIs;
         [SerializeField] private GameManager gameManager;
     
+        private void Awake()
+        {
+            gameManager = FindObjectOfType<GameManager>();
+            if (gameManager == null)
+            {
+                return;
+            }
+        }
+
         private void OnEnable()
         {
             Spawner.Spawner.OnEntitySpawned += HandleEntitySpawned;
@@ -110,7 +119,7 @@ namespace UI
                 // Initialize count text
                 if (ui.countText != null)
                 {
-                    int count = Manager.EntityCounter.Instance.GetEntityCount(ui.config.entityType);
+                    int count = EntityCounter.Instance.GetEntityCount(ui.config.entityType);
                     ui.countText.text = $"{count}/{ui.config.maxEntities}";
                 }
             }
