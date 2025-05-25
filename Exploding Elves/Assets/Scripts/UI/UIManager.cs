@@ -3,26 +3,19 @@ using Actors.Enum;
 using Config;
 using Manager;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using UnityEngine.Serialization;
 
 namespace UI
 {
     public class UIManager : MonoBehaviour
     {
         [System.Serializable]
-        public class SpawnerUI
+        public class SpawnerUIConfig
         {
-            [FormerlySerializedAs("config")] public SpawnerConfigSO _configSo;
-            public TMP_Text nameText;
-            public Slider intervalSlider;
-            public TMP_Text intervalText;
-            public Image colorIndicator;
-            public TMP_Text countText;
+            public SpawnerConfigSO config;
+            public SpawnerUIView view;
         }
     
-        [SerializeField] private SpawnerUI[] spawnerUIs;
+        [SerializeField] private SpawnerUIConfig[] spawnerConfigs;
         [SerializeField] private GameManager gameManager;
     
         private void Awake()
@@ -58,12 +51,10 @@ namespace UI
 
         private void UpdateCountForType(EntityType type)
         {
-            foreach (var ui in spawnerUIs)
+            foreach (var config in spawnerConfigs)
             {
-                if (ui._configSo == null || ui.countText == null || ui._configSo.entityType != type) continue;
-
-                int count = Manager.EntityCounter.Instance.GetEntityCount(type);
-                ui.countText.text = $"Count: {count}/{ui._configSo.maxEntities}";
+                if (config.config == null || config.view == null || config.config.entityType != type) continue;
+                config.view.Initialize(config.config, System.Array.IndexOf(spawnerConfigs, config), gameManager);
             }
         }
     
@@ -80,49 +71,12 @@ namespace UI
                 return;
             }
         
-            for (int i = 0; i < spawnerUIs.Length; i++)
+            for (int i = 0; i < spawnerConfigs.Length; i++)
             {
-                var ui = spawnerUIs[i];
-                if (ui._configSo == null) continue;
+                var config = spawnerConfigs[i];
+                if (config.config == null || config.view == null) continue;
 
-                // Set name
-                if (ui.nameText != null)
-                {
-                    ui.nameText.text = ui._configSo.spawnerName;
-                }
-
-                // Set color indicator
-                if (ui.colorIndicator != null)
-                {
-                    ui.colorIndicator.color = ui._configSo.indicatorColor;
-                }
-
-                // Set up interval slider
-                if (ui.intervalSlider != null)
-                {
-                    ui.intervalSlider.value = ui._configSo.spawnInterval;
-                    if (ui.intervalText != null)
-                    {
-                        ui.intervalText.text = ui._configSo.spawnInterval.ToString("F1");
-                    }
-
-                    int spawnerIndex = i; // Capture for lambda
-                    ui.intervalSlider.onValueChanged.AddListener((value) =>
-                    {
-                        gameManager.SetSpawnerInterval(spawnerIndex, value);
-                        if (ui.intervalText != null)
-                        {
-                            ui.intervalText.text = value.ToString("F1");
-                        }
-                    });
-                }
-
-                // Initialize count text
-                if (ui.countText != null)
-                {
-                    int count = EntityCounter.Instance.GetEntityCount(ui._configSo.entityType);
-                    ui.countText.text = $"{count}/{ui._configSo.maxEntities}";
-                }
+                config.view.Initialize(config.config, i, gameManager);
             }
         }
     }
