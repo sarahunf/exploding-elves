@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using Actors.Enum;
 using Actors.Interface;
-using Config;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
 using IPool = Actors.Pool.IPool;
 using IPoolable = Actors.Pool.IPoolable;
 using Actors.Pool;
+using Config;
 
 namespace Actors
 {
@@ -16,6 +16,7 @@ namespace Actors
         [SerializeField] private ElfConfig config;
         [SerializeField] private SpiderElfView view;
         private ParticlePool explosionPool;
+        private ParticlePool spawningPool;
         
         private IPool pool;
         private bool isExploding = false;
@@ -31,10 +32,10 @@ namespace Actors
             entityType = config.type;
         }
 
-        private void Start()
+        public void InitializePools(ParticlePool explosionPool, ParticlePool spawningPool)
         {
-            //TODO: inject pool instead of find object
-            explosionPool = FindObjectOfType<ParticlePool>();
+            this.explosionPool = explosionPool;
+            this.spawningPool = spawningPool;
         }
 
         private void Update()
@@ -62,26 +63,18 @@ namespace Actors
                 Vector3 newPos = new Vector3(transform.position.x, hit.point.y + 0.1f, transform.position.z);
                 transform.position = newPos;
             }
-            else
-            {
-                Debug.LogWarning($"[ELF_DEBUG] [{gameObject.name}] Spawn - No ground detected at initial position {transform.position}");
-            }
         }
         
         public override void OnCollision(IEntity other)
         {
-            Debug.Log($"[ELF_DEBUG] [{gameObject.name}] OnCollision called with: {other.GetType().Name}");
-            
             if (isExploding || !canReplicate)
-            {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Collision ignored - isExploding: {isExploding}, canReplicate: {canReplicate}");
+            { 
                 return;
             }
 
             var otherElf = other as Elf;
             if (otherElf == null)
-            {
-                Debug.LogWarning($"[ELF_DEBUG] [{gameObject.name}] Other entity is not an Elf");
+            { 
                 return;
             }
             
@@ -91,15 +84,11 @@ namespace Actors
             
             if (!processedCollisions.Add(collisionId))
             {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Collision already processed");
                 return;
             }
-
-            Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Processing collision with {otherElf.gameObject.name}");
             
             if (other.GetEntityType() == entityType)
             {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Same type collision - triggering replication");
                 OnElfReplication?.Invoke(entityType, transform.position);
                 
                 StartCoroutine(ReplicationCooldown());
@@ -107,7 +96,6 @@ namespace Actors
             }
             else
             {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Different type collision - triggering explosion");
                 Explode();
                 otherElf.Explode();
             }
@@ -135,15 +123,12 @@ namespace Actors
             if (isExploding) return;
             
             isExploding = true;
-            Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Starting explosion");
 
             if (explosionPool != null)
             {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Getting explosion from pool");
                 var explosion = explosionPool.Get();
                 if (explosion == null)
                 {
-                    Debug.LogError($"[ELF_DEBUG] [{gameObject.name}] Failed to get explosion from pool");
                     return;
                 }
                 
@@ -151,7 +136,6 @@ namespace Actors
                 var particleSystem = explosion.GetComponent<ParticleSystem>();
                 if (particleSystem != null)
                 {
-                    Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Playing particle system");
                     particleSystem.Play();
                     explosionPool.ReturnToPoolAfterDuration(explosion, (particleSystem.main.duration + particleSystem.main.startDelay.constant) + 0.2f);
                 }
@@ -160,16 +144,11 @@ namespace Actors
                     Debug.LogError($"[ELF_DEBUG] [{gameObject.name}] No ParticleSystem component found on explosion prefab");
                 }
             }
-            else
-            {
-                Debug.LogWarning($"[ELF_DEBUG] [{gameObject.name}] Missing explosion setup - config.explosionEffect: {config.explosionEffect != null}, explosionPool: {explosionPool != null}");
-            }
             
             if (view != null) {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Triggering view attack animation");
+                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] | animation");
                 view.AttackAndDestroy(OnAttackFinished);
             } else {
-                Debug.LogWarning($"[ELF_DEBUG] [{gameObject.name}] No view component found, using delayed return");
                 StartCoroutine(DelayedReturn());
             }
         }
@@ -178,20 +157,16 @@ namespace Actors
             StartCoroutine(DelayedReturn());
         }
 
-        public IEnumerator DelayedReturn()
+        private IEnumerator DelayedReturn()
         {
-            var component = GetComponent<Collider>();
-            if (component != null) component.enabled = false;
-            
             yield return new WaitForSeconds(0.1f);
             
+            Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
             ReturnToPool();
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Trigger entered with: {other.gameObject.name}");
-            
             var otherElf = other.GetComponent<Elf>();
             if (otherElf == null)
             {
@@ -200,18 +175,11 @@ namespace Actors
             
             if (otherElf != null)
             {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Found other elf: {otherElf.gameObject.name}");
                 OnCollision(otherElf);
             }
             else if (other.CompareTag($"Rock"))
             {
-                Debug.Log($"[ELF_DEBUG] [{gameObject.name}] Collided with rock");
                 HandleRockCollision(other);
-            }
-            else
-            {
-                Debug.LogWarning($"[ELF_DEBUG] [{gameObject.name}] Trigger entered with object that has no Elf component: {other.gameObject.name}");
-                return;
             }
         }
 
@@ -228,8 +196,6 @@ namespace Actors
         public void SetPool(IPool pool)
         {
             this.pool = pool;
-            var component = GetComponent<Collider>();
-            if (component != null) component.enabled = true;
         }
         
         public void ReturnToPool()
@@ -249,40 +215,41 @@ namespace Actors
                 
                 nextDirectionChangeTime = Time.time + config.randomDirectionChangeInterval;
             }
-            
-            // Calculate horizontal movement
             Vector3 horizontalMovement = new Vector3(currentDirection.x, 0, currentDirection.z) * (config.moveSpeed * Time.deltaTime);
             Vector3 newPosition = transform.position + horizontalMovement;
             
-            // Rotate to face movement direction
             if (horizontalMovement != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(horizontalMovement);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
             }
-            
-            // Check for ground directly below
             if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out var hit, 1f))
             {
                 float targetHeight = hit.point.y + 0.1f;
-                // Only allow height changes within a reasonable range (0.5 units)
-                if (Mathf.Abs(targetHeight - transform.position.y) <= 0.5f)
-                {
-                    newPosition.y = targetHeight;
-                }
-                else
-                {
-                    // If height difference is too large, maintain current height
-                    newPosition.y = transform.position.y;
-                }
+                newPosition.y = Mathf.Abs(targetHeight - transform.position.y) <= 0.5f ? targetHeight : transform.position.y;
             }
             else
             {
-                // If no ground found, maintain current height
                 newPosition.y = transform.position.y;
             }
             
             transform.position = newPosition;
+        }
+
+        public void ShowSpawnEffect(Vector3 position)
+        {
+            if (spawningPool == null) return;
+            
+            var spawnEffect = spawningPool.Get();
+            if (spawnEffect == null) return;
+                
+            spawnEffect.transform.position = position;
+            var particleSystem = spawnEffect.GetComponent<ParticleSystem>();
+            if (particleSystem != null)
+            {
+                particleSystem.Play();
+                spawningPool.ReturnToPoolAfterDuration(spawnEffect, (particleSystem.main.duration + particleSystem.main.startDelay.constant) + 0.2f);
+            }
         }
     }
 }

@@ -38,6 +38,15 @@ namespace Actors.Factory
 
             GameObject obj = pool.Get();
             var entity = obj.GetComponent<IEntity>();
+            
+            if (entity is Elf elf)
+            {
+                elf.InitializePools(
+                    Manager.GameManager.Instance.GetExplosionPool(),
+                    Manager.GameManager.Instance.GetSpawningPool()
+                );
+            }
+            
             return entity;
         }
     }

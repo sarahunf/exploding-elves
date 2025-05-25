@@ -79,7 +79,7 @@ namespace Spawner
                 
                 Debug.DrawRay(rayStart, Vector3.down * 200f, Color.red, 1f);
                 
-                if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f))
+                if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f) && hit.collider.CompareTag("Ground"))
                 {
                     randomPosition.y = hit.point.y + 0.05f;
 
@@ -130,12 +130,7 @@ namespace Spawner
         {
             SpawnEntity();
         }
-
-        public void OnEntityDestroyed()
-        {
-            EntityCounter.Instance.OnEntityDestroyed(config.entityType);
-        }
-
+        
         public EntityType GetEntityType()
         {
             return config.entityType;
