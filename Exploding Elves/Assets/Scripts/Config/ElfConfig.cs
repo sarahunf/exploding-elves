@@ -17,6 +17,7 @@ namespace Config
         [Header("Visual Settings")]
         public ParticleSystem explosionEffect;
         public EntityType type;
+        public Color color;
         
         [Header("Pool Settings")]
         public int initialPoolSize = 10;

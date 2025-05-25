@@ -13,12 +13,14 @@ namespace Actors
     public class Elf : Entity, IPoolable
     {
         [SerializeField] private ElfConfig config;
+        [SerializeField] private SpiderElfView view;
         
         private IPool pool;
         private bool isExploding = false;
         private bool canReplicate = true;
         private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
         private static float lastCleanupTime = 0f;
+        private Vector3 lastPosition;
         
         public static event Action<EntityType, Vector3> OnElfReplication;
 
@@ -31,6 +33,9 @@ namespace Actors
         private void Update()
         {
             Move();
+            bool isMoving = (transform.position - lastPosition).sqrMagnitude > 0.0001f;
+            view.SetWalking(isMoving);
+            lastPosition = transform.position;
             if (Time.time - lastCleanupTime > config.collisionCleanupInterval)
             {
                 processedCollisions.Clear();
@@ -43,6 +48,8 @@ namespace Actors
         {
             isExploding = false;
             canReplicate = true;
+            view.SetColor(config.color);
+            lastPosition = transform.position;
             Debug.Log($"[{gameObject.name}] Enabled - Type: {config.type}");
         }
         
@@ -109,6 +116,14 @@ namespace Actors
                 Destroy(explosion.gameObject, explosion.main.duration);
             }
             
+            if (view != null) {
+                view.AttackAndDestroy(OnAttackFinished);
+            } else {
+                StartCoroutine(DelayedReturn());
+            }
+        }
+        private void OnAttackFinished()
+        {
             StartCoroutine(DelayedReturn());
         }
 

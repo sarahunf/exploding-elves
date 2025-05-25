@@ -4,6 +4,8 @@ using Config;
 using Spawner.Interface;
 using UnityEngine;
 using System.Collections;
+using Manager;
+using Actors.Enum;
 
 namespace Spawner
 {
@@ -13,7 +15,6 @@ namespace Spawner
         
         private IEntityFactory entityFactory;
         private Coroutine spawnCoroutine;
-        private int currentEntities = 0;
     
         private void Awake()
         {
@@ -43,7 +44,7 @@ namespace Spawner
         {
             while (true)
             {
-                if (currentEntities < config.maxEntities)
+                if (EntityCounter.Instance.CanSpawnEntity(config.entityType, config.maxEntities))
                 {
                     SpawnEntity();
                 }
@@ -65,7 +66,7 @@ namespace Spawner
             );
             
             entity.Initialize(randomPosition);
-            currentEntities++;
+            EntityCounter.Instance.OnEntitySpawned(config.entityType);
         }
 
         public void SetSpawnInterval(float interval)
@@ -73,6 +74,7 @@ namespace Spawner
             config.spawnInterval = interval;
             StartSpawning();
         }
+
         void ISpawner.SpawnEntity()
         {
             SpawnEntity();
@@ -80,7 +82,17 @@ namespace Spawner
 
         public void OnEntityDestroyed()
         {
-            currentEntities--;
+            EntityCounter.Instance.OnEntityDestroyed(config.entityType);
+        }
+
+        public EntityType GetEntityType()
+        {
+            return config.entityType;
+        }
+
+        public SpawnerConfig GetConfig()
+        {
+            return config;
         }
     }
 }

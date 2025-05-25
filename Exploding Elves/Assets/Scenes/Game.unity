@@ -1772,6 +1772,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ExplosionPool
       objectReference: {fileID: 0}
+    - target: {fileID: 4013383735645133388, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
+      propertyPath: initialSize
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 4013383735645133389, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
       propertyPath: m_RootOrder
       value: 4
