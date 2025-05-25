@@ -8729,6 +8729,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4013383735645133389, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
   m_PrefabInstance: {fileID: 4013383734228546405}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1953540393 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4013383735645133388, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
+  m_PrefabInstance: {fileID: 4013383734228546405}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f87bd2a78174e2546b4478ebe52f58eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1962249602
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10163,6 +10174,10 @@ PrefabInstance:
       propertyPath: whiteElfPool
       value: 
       objectReference: {fileID: 1732493239}
+    - target: {fileID: 3041937207600005204, guid: 7d0d0778cfef8174eba4e51d7d690fc0, type: 3}
+      propertyPath: explosionPool
+      value: 
+      objectReference: {fileID: 1953540393}
     - target: {fileID: 3041937207600005205, guid: 7d0d0778cfef8174eba4e51d7d690fc0, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -10322,8 +10337,12 @@ PrefabInstance:
       value: ExplosionPool
       objectReference: {fileID: 0}
     - target: {fileID: 4013383735645133388, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
+      propertyPath: prefab
+      value: 
+      objectReference: {fileID: 180128, guid: 6586ff0f14125534cae2f5d8f04b7871, type: 3}
+    - target: {fileID: 4013383735645133388, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
       propertyPath: initialSize
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4013383735645133389, guid: de6354ec49a87b04bafb4cc24032e273, type: 3}
       propertyPath: m_RootOrder
