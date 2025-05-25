@@ -16,6 +16,7 @@ namespace Spawner
         
         private IEntityFactory entityFactory;
         private Coroutine spawnCoroutine;
+        private float currentSpawnTimer;
     
         public static event System.Action<EntityType> OnEntitySpawned;
     
@@ -88,13 +89,22 @@ namespace Spawner
     
         private IEnumerator SpawnRoutine()
         {
+            currentSpawnTimer = 0f;
+            
             while (true)
             {
-                if (EntityCounter.Instance.CanSpawnEntity(_configSo.entityType, _configSo.maxEntities))
+                currentSpawnTimer += Time.deltaTime;
+                
+                if (currentSpawnTimer >= _configSo.spawnInterval)
                 {
-                    SpawnEntity();
+                    if (EntityCounter.Instance.CanSpawnEntity(_configSo.entityType, _configSo.maxEntities))
+                    {
+                        SpawnEntity();
+                    }
+                    currentSpawnTimer = 0f;
                 }
-                yield return new WaitForSeconds(_configSo.spawnInterval);
+                
+                yield return null;
             }
         }
         
@@ -117,6 +127,7 @@ namespace Spawner
         public void SetSpawnInterval(float interval)
         {
             _configSo.spawnInterval = interval;
+            currentSpawnTimer = 0f;
             StartSpawning();
         }
 

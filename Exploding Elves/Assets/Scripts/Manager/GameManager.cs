@@ -90,7 +90,7 @@ namespace Manager
             }
         }
     
-        public void SetSpawnerInterval(int spawnerIndex, float interval)
+        public void SetSpawnerInterval(int spawnerIndex, float interval, bool resetTimer)
         {
             if (spawnerIndex >= 0 && spawnerIndex < spawners.Length)
             {

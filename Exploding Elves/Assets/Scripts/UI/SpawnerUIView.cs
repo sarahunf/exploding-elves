@@ -18,9 +18,22 @@ namespace UI
 
         public void Initialize(SpawnerConfigSO config, int spawnerIndex, GameManager gameManager)
         {
+            if (viewModel != null)
+            {
+                UnsubscribeFromEvents();
+            }
+
             viewModel = new SpawnerUIViewModel(config, spawnerIndex, gameManager);
             SetupUI();
             SubscribeToEvents();
+        }
+
+        public void UpdateCount()
+        {
+            if (viewModel != null)
+            {
+                viewModel.UpdateCount();
+            }
         }
 
         private void SetupUI()
@@ -32,14 +45,15 @@ namespace UI
 
             if (colorIndicator != null)
             {
-                nameText.color = viewModel.IndicatorColor;
+                nameText!.color = viewModel.IndicatorColor;
                 colorIndicator.color = viewModel.IndicatorColor;
             }
 
             if (intervalSlider != null)
             {
-                intervalSlider.value = viewModel.SpawnInterval;
-                UpdateIntervalText(viewModel.SpawnInterval);
+                float initialValue = Mathf.Clamp(viewModel.SpawnInterval, intervalSlider.minValue, intervalSlider.maxValue);
+                intervalSlider.value = initialValue;
+                UpdateIntervalText(initialValue);
                 intervalSlider.onValueChanged.AddListener(OnIntervalChanged);
             }
 
@@ -48,11 +62,14 @@ namespace UI
 
         private void SubscribeToEvents()
         {
-            viewModel.OnCountChanged += UpdateCountText;
-            viewModel.OnIntervalChanged += UpdateIntervalText;
+            if (viewModel != null)
+            {
+                viewModel.OnCountChanged += UpdateCountText;
+                viewModel.OnIntervalChanged += UpdateIntervalText;
+            }
         }
 
-        private void OnDestroy()
+        private void UnsubscribeFromEvents()
         {
             if (viewModel != null)
             {
@@ -61,24 +78,32 @@ namespace UI
             }
         }
 
+        private void OnDestroy()
+        {
+            UnsubscribeFromEvents();
+        }
+
         private void OnIntervalChanged(float value)
         {
-            viewModel.SetSpawnInterval(value);
+            if (viewModel != null)
+            {
+                viewModel.SetSpawnInterval(value);
+            }
         }
 
         private void UpdateIntervalText(float value)
         {
             if (intervalText != null)
             {
-                intervalText.text = value.ToString("F1");
+                intervalText.text = $"{value.ToString("F1")}s";
             }
         }
 
         private void UpdateCountText()
         {
-            if (countText != null)
+            if (countText != null && viewModel != null)
             {
-                countText.text = $"Count: {viewModel.CurrentCount}/{viewModel.MaxEntities}";
+                countText.text = $"{viewModel.CurrentCount}/{viewModel.MaxEntities}";
             }
         }
     }

@@ -44,25 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e25de3d951f4ced9c9bdce5c155729a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnerUIs:
+  spawnerConfigs:
   - config: {fileID: 11400000, guid: 9fe35ff1d9beba44f86b04c17384b046, type: 2}
-    nameText: {fileID: 0}
-    intervalSlider: {fileID: 0}
-    intervalText: {fileID: 0}
-    colorIndicator: {fileID: 0}
+    view: {fileID: 0}
   - config: {fileID: 11400000, guid: 92bbd23dea7265b43a0fdcf9c0048e60, type: 2}
-    nameText: {fileID: 0}
-    intervalSlider: {fileID: 0}
-    intervalText: {fileID: 0}
-    colorIndicator: {fileID: 0}
-  - config: {fileID: 11400000, guid: 2c819e489ae26344da74a74e4fbf67fa, type: 2}
-    nameText: {fileID: 0}
-    intervalSlider: {fileID: 0}
-    intervalText: {fileID: 0}
-    colorIndicator: {fileID: 0}
+    view: {fileID: 0}
   - config: {fileID: 11400000, guid: a6607e4e4cc0b2746a1e553029efbe48, type: 2}
-    nameText: {fileID: 0}
-    intervalSlider: {fileID: 0}
-    intervalText: {fileID: 0}
-    colorIndicator: {fileID: 0}
+    view: {fileID: 0}
+  - config: {fileID: 11400000, guid: 2c819e489ae26344da74a74e4fbf67fa, type: 2}
+    view: {fileID: 0}
   gameManager: {fileID: 0}

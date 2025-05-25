@@ -54,7 +54,7 @@ namespace UI
             foreach (var config in spawnerConfigs)
             {
                 if (config.config == null || config.view == null || config.config.entityType != type) continue;
-                config.view.Initialize(config.config, System.Array.IndexOf(spawnerConfigs, config), gameManager);
+                config.view.UpdateCount();
             }
         }
     
