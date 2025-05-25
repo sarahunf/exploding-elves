@@ -21,8 +21,8 @@ namespace Actors
         private MovementComponent movementComponent;
         
         private IPool pool;
-        private bool isExploding = false;
-        private bool canReplicate = true;
+        private bool isExploding;
+        private bool canReplicate;
         private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
         private static float lastCleanupTime = 0f;
         
@@ -53,15 +53,26 @@ namespace Actors
         private void OnEnable()
         {
             isExploding = false;
-            canReplicate = true;
+            canReplicate = false;  // Start with replication disabled
             view.SetBodyColor(_configSo.body);
             view.SetHighlightColor(_configSo.highlight);
+            view.SetEmission(true, _configSo.body * 2f); // Enable emission with brighter version of body color
+            view.SetScale(false); // Start with smaller scale
             
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out var hit, 1f))
             {
                 Vector3 newPos = new Vector3(transform.position.x, hit.point.y + 0.1f, transform.position.z);
                 transform.position = newPos;
             }
+            StartCoroutine(SpawnCooldown());
+        }
+        
+        private IEnumerator SpawnCooldown()
+        {
+            yield return new WaitForSeconds(2f);
+            canReplicate = true;
+            view.SetEmission(false, Color.black);
+            view.SetScale(true); // Scale up when can replicate
         }
         
         public override void OnCollision(IEntity other)
@@ -104,8 +115,12 @@ namespace Actors
         private IEnumerator ReplicationCooldown()
         {
             canReplicate = false;
+            view.SetEmission(true, _configSo.body * 2f);
+            view.SetScale(false); // Scale down when can't replicate
             yield return new WaitForSeconds(_configSo.replicationCooldown);
             canReplicate = true;
+            view.SetEmission(false, Color.black);
+            view.SetScale(true); // Scale up when can replicate again
         }
 
         private IEnumerator RemoveCollisionId((int, int) collisionId)
@@ -211,11 +226,6 @@ namespace Actors
             }
         }
         
-        protected override void Move()
-        {
-            // Movement is now handled by MovementComponent
-        }
-
         public void ShowSpawnEffect(Vector3 position)
         {
             if (spawningPool == null) return;

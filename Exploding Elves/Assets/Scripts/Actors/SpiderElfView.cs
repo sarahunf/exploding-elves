@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 
 namespace Actors
 {
@@ -16,6 +17,15 @@ namespace Actors
         [Header("Animation Parameters")]
         public string attackTrigger = "Attack";
         public string walkingBool = "Walking";
+
+        private Vector3 normalScale;
+        private const float SPAWN_SCALE = 0.5f;
+        private const float SCALE_DURATION = 0.3f;
+
+        private void Awake()
+        {
+            normalScale = transform.localScale;
+        }
 
         public void SetBodyColor(Color color)
         {
@@ -33,6 +43,29 @@ namespace Actors
                 //1 is legs
                 spiderRenderer.materials[1].color = color; 
             }
+        }
+
+        public void SetEmission(bool isSpawning, Color emissionColor)
+        {
+            if (spiderRenderer != null)
+            {
+                Material bodyMaterial = spiderRenderer.materials[0];
+                if (isSpawning)
+                {
+                    bodyMaterial.EnableKeyword("_EMISSION");
+                    bodyMaterial.SetColor("_EmissionColor", emissionColor);
+                }
+                else
+                {
+                    bodyMaterial.DisableKeyword("_EMISSION");
+                }
+            }
+        }
+
+        public void SetScale(bool canReplicate)
+        {
+            Vector3 targetScale = canReplicate ? normalScale : normalScale * SPAWN_SCALE;
+            transform.DOScale(targetScale, SCALE_DURATION).SetEase(Ease.OutBack);
         }
         
         public void SetWalking(bool isWalking)

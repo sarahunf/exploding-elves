@@ -4,6 +4,7 @@ using Actors.Factory;
 using Actors.Pool;
 using UnityEngine;
 using Config;
+using UnityEngine.SceneManagement;
 
 namespace Manager
 {
@@ -15,6 +16,8 @@ namespace Manager
 
         private static GameManager instance;
         public static GameManager Instance => instance;
+
+        private bool isPaused = false;
 
         private void Awake()
         {
@@ -96,6 +99,43 @@ namespace Manager
             {
                 spawners[spawnerIndex].SetSpawnInterval(interval);
             }
+        }
+
+        public void PauseGame()
+        {
+            isPaused = true;
+            Time.timeScale = 0f;
+        }
+
+        public void ResumeGame()
+        {
+            isPaused = false;
+            Time.timeScale = 1f;
+        }
+
+        public void TogglePause()
+        {
+            if (isPaused)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+
+        public void RestartGame()
+        {
+            // Reset time scale in case the game was paused
+            Time.timeScale = 1f;
+            // Reload the current scene
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        public void QuitGame()
+        {
+            #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+            #else
+                Application.Quit();
+            #endif
         }
     }
 }
