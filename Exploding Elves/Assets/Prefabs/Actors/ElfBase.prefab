@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 6021987723304765930}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 2.1, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7985946281630345228}
@@ -97,10 +97,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 1
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.13
+  m_Height: 0.57
+  m_Direction: 2
+  m_Center: {x: 0, y: 0.18, z: -0.08}
 --- !u!54 &3197187093432742725
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -147,15 +147,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalScale.x
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalScale.z
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalPosition.x

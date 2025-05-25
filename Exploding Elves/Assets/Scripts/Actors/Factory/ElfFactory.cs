@@ -19,7 +19,6 @@ namespace Actors.Factory
 
         private void Awake()
         {
-            Debug.Log("[ElfFactory] Initializing pool map");
             poolMap = new Dictionary<EntityType, EntityPool>
             {
                 { EntityType.BlackElf, blackElfPool },
@@ -31,7 +30,6 @@ namespace Actors.Factory
 
         public IEntity CreateEntity(EntityType entityType)
         {
-            Debug.Log($"[ElfFactory] Creating entity of type {entityType}");
             if (!poolMap.TryGetValue(entityType, out var pool))
             {
                 Debug.LogError($"[ElfFactory] No pool found for {entityType}");
@@ -40,7 +38,6 @@ namespace Actors.Factory
 
             GameObject obj = pool.Get();
             var entity = obj.GetComponent<IEntity>();
-            Debug.Log($"[ElfFactory] Created entity {obj.name} of type {entityType}");
             return entity;
         }
     }

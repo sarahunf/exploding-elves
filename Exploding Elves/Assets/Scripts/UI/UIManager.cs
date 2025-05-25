@@ -31,12 +31,8 @@ namespace UI
         {
             if (gameManager == null)
             {
-                gameManager = FindObjectOfType<GameManager>();
-                if (gameManager == null)
-                {
-                    Debug.LogError("GameManager not found in the scene!");
-                    return;
-                }
+                Debug.LogError("GameManager not found in the scene!");
+                return;
             }
         
             for (int i = 0; i < spawnerUIs.Length; i++)

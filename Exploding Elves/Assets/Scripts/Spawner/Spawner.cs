@@ -22,6 +22,7 @@ namespace Spawner
             if (entityFactory == null)
             {
                 Debug.LogError("ElfFactory not found in the scene!");
+                return;
             }
         }
     
@@ -54,19 +55,69 @@ namespace Spawner
         
         private void SpawnEntity()
         {
-            if (entityFactory == null) return;
+            var entity = entityFactory?.CreateEntity(config.entityType);
+            if (entity == null)
+            {
+                Debug.LogError("[Spawner] Failed to create entity - entityFactory returned null");
+                return;
+            }
             
-            var entity = entityFactory.CreateEntity(config.entityType);
-            if (entity == null) return;
+            int maxAttempts = 10; // Prevent infinite loop
+            int attempts = 0;
             
-            Vector3 randomPosition = transform.position + new Vector3(
-                Random.Range(-config.spawnAreaSize.x/2, config.spawnAreaSize.x/2),
-                0,
-                Random.Range(-config.spawnAreaSize.z/2, config.spawnAreaSize.z/2)
-            );
+            do
+            {
+                var randomPosition = transform.position + new Vector3(
+                    Random.Range(-config.spawnAreaSize.x/2, config.spawnAreaSize.x/2),
+                    0,
+                    Random.Range(-config.spawnAreaSize.z/2, config.spawnAreaSize.z/2)
+                );
+                
+                RaycastHit hit;
+                Vector3 rayStart = randomPosition + Vector3.up * 100f;
+                Vector3 rayEnd = rayStart + Vector3.down * 200f;
+                
+                Debug.DrawRay(rayStart, Vector3.down * 200f, Color.red, 1f);
+                
+                if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f))
+                {
+                    randomPosition.y = hit.point.y + 0.05f;
+
+                    float checkRadius = 0.5f;
+                    Collider[] colliders = Physics.OverlapSphere(randomPosition, checkRadius);
+                    bool rockNearby = false;
+                    foreach (var col in colliders)
+                    {
+                        if (col.CompareTag("Rock"))
+                        {
+                            rockNearby = true;
+                            break;
+                        }
+                    }
+                    if (rockNearby)
+                    {
+                        attempts++;
+                        continue;
+                    }
+
+                    entity.Initialize(randomPosition);
+                    EntityCounter.Instance.OnEntitySpawned(config.entityType);
+                    return;
+                }
+                
+                attempts++;
+            } while (attempts < maxAttempts);
             
-            entity.Initialize(randomPosition);
-            EntityCounter.Instance.OnEntitySpawned(config.entityType);
+            if (attempts >= maxAttempts)
+            {
+                Debug.LogWarning($"[Spawner] Could not find valid spawn position within ground collider after {maxAttempts} attempts");
+                return;
+            }
+            
+            if (entity is MonoBehaviour entityMono)
+            {
+                Destroy(entityMono.gameObject);
+            }
         }
 
         public void SetSpawnInterval(float interval)

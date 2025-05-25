@@ -19,8 +19,7 @@ namespace Actors.Pool
                 return;
             }
 
-            var particleSystem = prefab.GetComponent<ParticleSystem>();
-            if (particleSystem == null)
+            if (prefab.GetComponent<ParticleSystem>() == null)
             {
                 Debug.LogError($"[{gameObject.name}] Prefab must have a ParticleSystem component!");
                 return;
@@ -29,7 +28,6 @@ namespace Actors.Pool
             this.prefab = prefab;
             initialSize = size;
             
-            Debug.Log($"[{gameObject.name}] Initializing particle pool with {initialSize} objects");
             for (int i = 0; i < initialSize; i++)
             {
                 AddToPool(CreateNew());
@@ -40,7 +38,6 @@ namespace Actors.Pool
         {
             if (prefab != null)
             {
-                Debug.Log($"[{gameObject.name}] Initializing pool with {initialSize} objects");
                 for (int i = 0; i < initialSize; i++)
                 {
                     AddToPool(CreateNew());
@@ -50,7 +47,6 @@ namespace Actors.Pool
 
         private GameObject CreateNew()
         {
-            Debug.Log($"[{gameObject.name}] Creating new particle effect in pool");
             GameObject go = Instantiate(prefab, transform);
             go.SetActive(false);
             return go;
@@ -61,11 +57,10 @@ namespace Actors.Pool
             if (pool.Count == 0)
             {
                 Debug.LogWarning($"[{gameObject.name}] Particle pool is empty! Creating new object");
-                AddToPool(CreateNew());
+                return CreateNew();
             }
 
             var obj = pool.Dequeue();
-            Debug.Log($"[{gameObject.name}] Getting particle effect from pool. Remaining: {pool.Count}");
             obj.SetActive(true);
             return obj;
         }
@@ -81,7 +76,6 @@ namespace Actors.Pool
                 ps.Clear();
             }
 
-            Debug.Log($"[{gameObject.name}] Returning particle effect to pool. Current size: {pool.Count}");
             obj.SetActive(false);
             pool.Enqueue(obj);
         }

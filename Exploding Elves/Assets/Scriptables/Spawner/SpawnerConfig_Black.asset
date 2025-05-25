@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityType: 1
   spawnInterval: 5
-  spawnAreaSize: {x: 5, y: 0, z: 5}
+  spawnAreaSize: {x: 2, y: 0, z: 2}
   maxEntities: 30
   spawnerName: Black
   indicatorColor: {r: 0, g: 0, b: 0, a: 1}

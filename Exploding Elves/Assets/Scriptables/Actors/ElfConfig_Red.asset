@@ -16,7 +16,7 @@ MonoBehaviour:
   randomDirectionChangeInterval: 1
   replicationCooldown: 20
   collisionCleanupInterval: 5
-  explosionEffect: {fileID: 6722861291806930524, guid: f695505bf21a89f4fa62a519d59dcce5, type: 3}
+  explosionEffect: {fileID: 19886758, guid: 8c27aeead6d968e4ba986702d6b84335, type: 3}
   type: 2
   color: {r: 1, g: 0, b: 0, a: 1}
   initialPoolSize: 10

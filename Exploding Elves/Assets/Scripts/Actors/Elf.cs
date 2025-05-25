@@ -27,7 +27,6 @@ namespace Actors
         private void Awake()
         {
             entityType = config.type;
-            Debug.Log($"[{gameObject.name}] Awake - Type: {config.type}");
         }
 
         private void Update()
@@ -40,7 +39,6 @@ namespace Actors
             {
                 processedCollisions.Clear();
                 lastCleanupTime = Time.time;
-                Debug.Log($"[{gameObject.name}] Cleaned up processed collisions HashSet");
             }
         }
         
@@ -50,7 +48,16 @@ namespace Actors
             canReplicate = true;
             view.SetColor(config.color);
             lastPosition = transform.position;
-            Debug.Log($"[{gameObject.name}] Enabled - Type: {config.type}");
+            
+            if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out var hit, 1f))
+            {
+                Vector3 newPos = new Vector3(transform.position.x, hit.point.y + 0.1f, transform.position.z);
+                transform.position = newPos;
+            }
+            else
+            {
+                Debug.LogWarning($"[ELF_DEBUG] [{gameObject.name}] Spawn - No ground detected at initial position {transform.position}");
+            }
         }
         
         public override void OnCollision(IEntity other)
@@ -66,11 +73,8 @@ namespace Actors
             
             if (!processedCollisions.Add(collisionId)) return;
 
-            Debug.Log($"[{gameObject.name}] Processing collision with {other.GetEntityType()}");
-            
             if (other.GetEntityType() == entityType)
             {
-                Debug.Log($"[{gameObject.name}] Same type collision - triggering replication");
                 OnElfReplication?.Invoke(entityType, transform.position);
                 
                 StartCoroutine(ReplicationCooldown());
@@ -78,7 +82,6 @@ namespace Actors
             }
             else
             {
-                Debug.Log($"[{gameObject.name}] Different type collision - exploding");
                 Explode();
                 otherElf.Explode();
             }
@@ -98,7 +101,6 @@ namespace Actors
             if (processedCollisions.Contains(collisionId))
             {
                 processedCollisions.Remove(collisionId);
-                Debug.Log($"[{gameObject.name}] Removed collision ID from processed collisions");
             }
         }
 
@@ -107,7 +109,6 @@ namespace Actors
             if (isExploding) return;
             
             isExploding = true;
-            Debug.Log($"[{gameObject.name}] Starting explosion");
 
             if (config.explosionEffect != null)
             {
@@ -129,7 +130,6 @@ namespace Actors
 
         public IEnumerator DelayedReturn()
         {
-            Debug.Log($"[{gameObject.name}] Delayed return to pool");
             var component = GetComponent<Collider>();
             if (component != null) component.enabled = false;
             
@@ -148,18 +148,31 @@ namespace Actors
             
             if (otherElf != null)
             {
-                Debug.Log($"[{gameObject.name}] Trigger entered with {otherElf.gameObject.name}");
                 OnCollision(otherElf);
+            }
+            else if (other.CompareTag($"Rock"))
+            {
+                HandleRockCollision(other);
             }
             else
             {
                 Debug.LogWarning($"[{gameObject.name}] Trigger entered with object that has no Elf component: {other.gameObject.name}");
+                return;
             }
+        }
+
+        private void HandleRockCollision(Collider rock)
+        {
+            Vector3 collisionNormal = (transform.position - rock.transform.position).normalized;
+            float yDirection = currentDirection.y;
+            currentDirection = Vector3.Reflect(currentDirection, collisionNormal);
+            currentDirection.y = yDirection;
+            transform.position += currentDirection * 0.1f;
+            nextDirectionChangeTime = Time.time + config.randomDirectionChangeInterval;
         }
         
         public void SetPool(IPool pool)
         {
-            Debug.Log($"[{gameObject.name}] Setting pool reference");
             this.pool = pool;
             var component = GetComponent<Collider>();
             if (component != null) component.enabled = true;
@@ -167,7 +180,6 @@ namespace Actors
         
         public void ReturnToPool()
         {
-            Debug.Log($"[{gameObject.name}] Returning to pool");
             pool?.ReturnToPool(gameObject);
         }
         
@@ -184,7 +196,32 @@ namespace Actors
                 nextDirectionChangeTime = Time.time + config.randomDirectionChangeInterval;
             }
             
-            transform.position += currentDirection * (config.moveSpeed * Time.deltaTime);
+            // Calculate horizontal movement
+            Vector3 horizontalMovement = new Vector3(currentDirection.x, 0, currentDirection.z) * (config.moveSpeed * Time.deltaTime);
+            Vector3 newPosition = transform.position + horizontalMovement;
+            
+            // Check for ground directly below
+            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out var hit, 1f))
+            {
+                float targetHeight = hit.point.y + 0.1f;
+                // Only allow height changes within a reasonable range (0.5 units)
+                if (Mathf.Abs(targetHeight - transform.position.y) <= 0.5f)
+                {
+                    newPosition.y = targetHeight;
+                }
+                else
+                {
+                    // If height difference is too large, maintain current height
+                    newPosition.y = transform.position.y;
+                }
+            }
+            else
+            {
+                // If no ground found, maintain current height
+                newPosition.y = transform.position.y;
+            }
+            
+            transform.position = newPosition;
         }
     }
 }

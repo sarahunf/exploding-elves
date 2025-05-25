@@ -35,5 +35,11 @@ namespace Manager
                 entityCounts[type] = 0;
             }
         }
+
+        public int GetEntityCount(EntityType type)
+        {
+            entityCounts.TryAdd(type, 0);
+            return entityCounts[type];
+        }
     }
 } 
