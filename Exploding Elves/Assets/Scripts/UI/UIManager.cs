@@ -1,4 +1,5 @@
-﻿using Actors.Enum;
+﻿using Actors;
+using Actors.Enum;
 using Config;
 using Manager;
 using UnityEngine;
@@ -17,10 +18,44 @@ namespace UI
             public Slider intervalSlider;
             public TMP_Text intervalText;
             public Image colorIndicator;
+            public TMP_Text countText;
         }
     
         [SerializeField] private SpawnerUI[] spawnerUIs;
         [SerializeField] private GameManager gameManager;
+    
+        private void OnEnable()
+        {
+            Spawner.Spawner.OnEntitySpawned += HandleEntitySpawned;
+            Elf.OnEntityDestroyed += HandleEntityDestroyed;
+        }
+
+        private void OnDisable()
+        {
+            Spawner.Spawner.OnEntitySpawned -= HandleEntitySpawned;
+            Elf.OnEntityDestroyed -= HandleEntityDestroyed;
+        }
+
+        private void HandleEntitySpawned(EntityType type)
+        {
+            UpdateCountForType(type);
+        }
+
+        private void HandleEntityDestroyed(EntityType type)
+        {
+            UpdateCountForType(type);
+        }
+
+        private void UpdateCountForType(EntityType type)
+        {
+            foreach (var ui in spawnerUIs)
+            {
+                if (ui.config == null || ui.countText == null || ui.config.entityType != type) continue;
+
+                int count = Manager.EntityCounter.Instance.GetEntityCount(type);
+                ui.countText.text = $"Count: {count}/{ui.config.maxEntities}";
+            }
+        }
     
         private void Start()
         {
@@ -70,6 +105,13 @@ namespace UI
                             ui.intervalText.text = value.ToString("F1");
                         }
                     });
+                }
+
+                // Initialize count text
+                if (ui.countText != null)
+                {
+                    int count = Manager.EntityCounter.Instance.GetEntityCount(ui.config.entityType);
+                    ui.countText.text = $"{count}/{ui.config.maxEntities}";
                 }
             }
         }

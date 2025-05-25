@@ -37,6 +37,7 @@ namespace Actors.Pool
             GameObject go = Instantiate(prefab, transform);
             go.SetActive(false);
             go.GetComponent<IPoolable>()?.SetPool(this);
+            go.SetActive(true);
             return go;
         }
 

@@ -26,6 +26,7 @@ namespace Actors
         private Vector3 lastPosition;
         
         public static event Action<EntityType, Vector3> OnElfReplication;
+        public static event Action<EntityType> OnEntityDestroyed;
 
         private void Awake()
         {
@@ -162,6 +163,7 @@ namespace Actors
             yield return new WaitForSeconds(0.1f);
             
             Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
+            OnEntityDestroyed?.Invoke(entityType);
             ReturnToPool();
         }
 

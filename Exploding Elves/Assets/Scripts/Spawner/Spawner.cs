@@ -16,6 +16,8 @@ namespace Spawner
         private IEntityFactory entityFactory;
         private Coroutine spawnCoroutine;
     
+        public static event System.Action<EntityType> OnEntitySpawned;
+    
         private void Awake()
         {
             entityFactory = FindObjectOfType<ElfFactory>();
@@ -102,6 +104,7 @@ namespace Spawner
 
                     entity.Initialize(randomPosition);
                     EntityCounter.Instance.OnEntitySpawned(config.entityType);
+                    OnEntitySpawned?.Invoke(config.entityType);
                     return;
                 }
                 

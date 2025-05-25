@@ -17,8 +17,6 @@ namespace Actors
         public string attackTrigger = "Attack";
         public string walkingBool = "Walking";
 
-        public event Action OnAttackFinished;
-
         public void SetColor(Color color)
         {
             if (spiderRenderer != null)
