@@ -1,6 +1,7 @@
 using UnityEngine;
 using Actors.Enum;
 using Actors.Movement;
+using UnityEngine.Serialization;
 
 namespace Config
 {
@@ -19,7 +20,8 @@ namespace Config
         [Header("Visual Settings")]
         public ParticleSystem explosionEffect;
         public EntityType type;
-        public Color color;
+        [FormerlySerializedAs("color")] public Color highlight;
+        public Color body;
         
         [Header("Pool Settings")]
         public int initialPoolSize = 10;

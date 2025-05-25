@@ -54,7 +54,8 @@ namespace Actors
         {
             isExploding = false;
             canReplicate = true;
-            view.SetColor(_configSo.color);
+            view.SetBodyColor(_configSo.body);
+            view.SetHighlightColor(_configSo.highlight);
             
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out var hit, 1f))
             {

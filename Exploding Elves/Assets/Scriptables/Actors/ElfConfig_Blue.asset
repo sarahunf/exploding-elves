@@ -19,5 +19,6 @@ MonoBehaviour:
   collisionCleanupInterval: 5
   explosionEffect: {fileID: 0}
   type: 4
-  color: {r: 0, g: 0.5728524, b: 0.9339623, a: 1}
+  highlight: {r: 0, g: 0.5728524, b: 0.9339623, a: 1}
+  body: {r: 0.2437403, g: 0.34932807, b: 0.745283, a: 1}
   initialPoolSize: 10

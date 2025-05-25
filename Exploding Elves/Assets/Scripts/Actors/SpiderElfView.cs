@@ -17,11 +17,19 @@ namespace Actors
         public string attackTrigger = "Attack";
         public string walkingBool = "Walking";
 
-        public void SetColor(Color color)
+        public void SetBodyColor(Color color)
         {
             if (spiderRenderer != null)
             {
                 //0 is body
+                spiderRenderer.materials[0].color = color; 
+            }
+        }
+        
+        public void SetHighlightColor(Color color)
+        {
+            if (spiderRenderer != null)
+            {
                 //1 is legs
                 spiderRenderer.materials[1].color = color; 
             }
