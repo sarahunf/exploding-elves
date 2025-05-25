@@ -5,6 +5,7 @@ using Manager;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Serialization;
 
 namespace UI
 {
@@ -13,7 +14,7 @@ namespace UI
         [System.Serializable]
         public class SpawnerUI
         {
-            public SpawnerConfig config;
+            [FormerlySerializedAs("config")] public SpawnerConfigSO _configSo;
             public TMP_Text nameText;
             public Slider intervalSlider;
             public TMP_Text intervalText;
@@ -59,10 +60,10 @@ namespace UI
         {
             foreach (var ui in spawnerUIs)
             {
-                if (ui.config == null || ui.countText == null || ui.config.entityType != type) continue;
+                if (ui._configSo == null || ui.countText == null || ui._configSo.entityType != type) continue;
 
                 int count = Manager.EntityCounter.Instance.GetEntityCount(type);
-                ui.countText.text = $"Count: {count}/{ui.config.maxEntities}";
+                ui.countText.text = $"Count: {count}/{ui._configSo.maxEntities}";
             }
         }
     
@@ -82,27 +83,27 @@ namespace UI
             for (int i = 0; i < spawnerUIs.Length; i++)
             {
                 var ui = spawnerUIs[i];
-                if (ui.config == null) continue;
+                if (ui._configSo == null) continue;
 
                 // Set name
                 if (ui.nameText != null)
                 {
-                    ui.nameText.text = ui.config.spawnerName;
+                    ui.nameText.text = ui._configSo.spawnerName;
                 }
 
                 // Set color indicator
                 if (ui.colorIndicator != null)
                 {
-                    ui.colorIndicator.color = ui.config.indicatorColor;
+                    ui.colorIndicator.color = ui._configSo.indicatorColor;
                 }
 
                 // Set up interval slider
                 if (ui.intervalSlider != null)
                 {
-                    ui.intervalSlider.value = ui.config.spawnInterval;
+                    ui.intervalSlider.value = ui._configSo.spawnInterval;
                     if (ui.intervalText != null)
                     {
-                        ui.intervalText.text = ui.config.spawnInterval.ToString("F1");
+                        ui.intervalText.text = ui._configSo.spawnInterval.ToString("F1");
                     }
 
                     int spawnerIndex = i; // Capture for lambda
@@ -119,8 +120,8 @@ namespace UI
                 // Initialize count text
                 if (ui.countText != null)
                 {
-                    int count = EntityCounter.Instance.GetEntityCount(ui.config.entityType);
-                    ui.countText.text = $"{count}/{ui.config.maxEntities}";
+                    int count = EntityCounter.Instance.GetEntityCount(ui._configSo.entityType);
+                    ui.countText.text = $"{count}/{ui._configSo.maxEntities}";
                 }
             }
         }

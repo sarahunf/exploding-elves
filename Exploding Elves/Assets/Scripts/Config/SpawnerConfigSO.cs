@@ -4,7 +4,7 @@ using Actors.Enum;
 namespace Config
 {
     [CreateAssetMenu(fileName = "SpawnerConfig", menuName = "Config/Spawner Config")]
-    public class SpawnerConfig : ScriptableObject
+    public class SpawnerConfigSO : ScriptableObject
     {
         [Header("Spawn Settings")]
         public EntityType entityType;

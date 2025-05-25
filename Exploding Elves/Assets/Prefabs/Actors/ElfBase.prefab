@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4412407418125474992}
   - component: {fileID: 3197187093432742725}
   - component: {fileID: 8006212391110340050}
+  - component: {fileID: 8804347697731750684}
   m_Layer: 0
   m_Name: ElfBase
   m_TagString: Untagged
@@ -91,6 +92,18 @@ MonoBehaviour:
   boundaryArea: 50
   config: {fileID: 0}
   view: {fileID: 7461957396296111874}
+--- !u!114 &8804347697731750684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6021987723304765930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8b4203f0bdc2734db5a6d380a8c2083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7591237913662246887
 PrefabInstance:
   m_ObjectHideFlags: 0

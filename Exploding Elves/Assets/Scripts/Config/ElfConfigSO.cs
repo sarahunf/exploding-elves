@@ -1,12 +1,14 @@
 using UnityEngine;
 using Actors.Enum;
+using Actors.Movement;
 
 namespace Config
 {
     [CreateAssetMenu(fileName = "ElfConfig", menuName = "Config/Elf Config")]
-    public class ElfConfig : ScriptableObject
+    public class ElfConfigSO : ScriptableObject
     {
         [Header("Movement Settings")]
+        public MovementStrategySO movementStrategy;
         public float moveSpeed = 4f;
         public float randomDirectionChangeInterval = 1f;
         

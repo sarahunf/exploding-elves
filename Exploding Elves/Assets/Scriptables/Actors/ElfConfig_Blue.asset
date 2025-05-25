@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26913b906c7ae2a47872c3e2103357d6, type: 3}
   m_Name: ElfConfig_Blue
   m_EditorClassIdentifier: 
-  moveSpeed: 4
+  movementStrategy: {fileID: 11400000, guid: ff4951211483b174eb9f0f77b6c326b4, type: 2}
+  moveSpeed: 8
   randomDirectionChangeInterval: 1
   replicationCooldown: 2
   collisionCleanupInterval: 5
-  explosionEffect: {fileID: 19886758, guid: 8c27aeead6d968e4ba986702d6b84335, type: 3}
+  explosionEffect: {fileID: 0}
   type: 4
   color: {r: 0, g: 0.5728524, b: 0.9339623, a: 1}
   initialPoolSize: 10

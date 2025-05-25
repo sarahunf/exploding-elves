@@ -8,29 +8,31 @@ using IPool = Actors.Pool.IPool;
 using IPoolable = Actors.Pool.IPoolable;
 using Actors.Pool;
 using Config;
+using UnityEngine.Serialization;
 
 namespace Actors
 {
     public class Elf : Entity, IPoolable
     {
-        [SerializeField] private ElfConfig config;
+        [FormerlySerializedAs("config")] [SerializeField] private ElfConfigSO _configSo;
         [SerializeField] private SpiderElfView view;
         private ParticlePool explosionPool;
         private ParticlePool spawningPool;
+        private MovementComponent movementComponent;
         
         private IPool pool;
         private bool isExploding = false;
         private bool canReplicate = true;
         private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
         private static float lastCleanupTime = 0f;
-        private Vector3 lastPosition;
         
         public static event Action<EntityType, Vector3> OnElfReplication;
         public static event Action<EntityType> OnEntityDestroyed;
 
         private void Awake()
         {
-            entityType = config.type;
+            entityType = _configSo.type;
+            movementComponent = GetComponent<MovementComponent>();
         }
 
         public void InitializePools(ParticlePool explosionPool, ParticlePool spawningPool)
@@ -41,11 +43,7 @@ namespace Actors
 
         private void Update()
         {
-            Move();
-            bool isMoving = (transform.position - lastPosition).sqrMagnitude > 0.0001f;
-            view.SetWalking(isMoving);
-            lastPosition = transform.position;
-            if (Time.time - lastCleanupTime > config.collisionCleanupInterval)
+            if (Time.time - lastCleanupTime > _configSo.collisionCleanupInterval)
             {
                 processedCollisions.Clear();
                 lastCleanupTime = Time.time;
@@ -56,8 +54,7 @@ namespace Actors
         {
             isExploding = false;
             canReplicate = true;
-            view.SetColor(config.color);
-            lastPosition = transform.position;
+            view.SetColor(_configSo.color);
             
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out var hit, 1f))
             {
@@ -106,7 +103,7 @@ namespace Actors
         private IEnumerator ReplicationCooldown()
         {
             canReplicate = false;
-            yield return new WaitForSeconds(config.replicationCooldown);
+            yield return new WaitForSeconds(_configSo.replicationCooldown);
             canReplicate = true;
         }
 
@@ -191,11 +188,13 @@ namespace Actors
         private void HandleRockCollision(Collider rock)
         {
             Vector3 collisionNormal = (transform.position - rock.transform.position).normalized;
+            Vector3 currentDirection = movementComponent.GetCurrentDirection();
             float yDirection = currentDirection.y;
-            currentDirection = Vector3.Reflect(currentDirection, collisionNormal);
-            currentDirection.y = yDirection;
-            transform.position += currentDirection * 0.1f;
-            nextDirectionChangeTime = Time.time + config.randomDirectionChangeInterval;
+            Vector3 newDirection = Vector3.Reflect(currentDirection, collisionNormal);
+            newDirection.y = yDirection;
+            movementComponent.SetDirection(newDirection);
+            movementComponent.SetNextDirectionChangeTime(Time.time + _configSo.randomDirectionChangeInterval);
+            transform.position += newDirection * 0.1f;
         }
         
         public void SetPool(IPool pool)
@@ -213,35 +212,7 @@ namespace Actors
         
         protected override void Move()
         {
-            if (currentDirection == Vector3.zero || Time.time >= nextDirectionChangeTime)
-            {
-                currentDirection = new Vector3(
-                    UnityEngine.Random.Range(-1f, 1f),
-                    0,
-                    UnityEngine.Random.Range(-1f, 1f)
-                ).normalized;
-                
-                nextDirectionChangeTime = Time.time + config.randomDirectionChangeInterval;
-            }
-            Vector3 horizontalMovement = new Vector3(currentDirection.x, 0, currentDirection.z) * (config.moveSpeed * Time.deltaTime);
-            Vector3 newPosition = transform.position + horizontalMovement;
-            
-            if (horizontalMovement != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(horizontalMovement);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
-            }
-            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out var hit, 1f))
-            {
-                float targetHeight = hit.point.y + 0.1f;
-                newPosition.y = Mathf.Abs(targetHeight - transform.position.y) <= 0.5f ? targetHeight : transform.position.y;
-            }
-            else
-            {
-                newPosition.y = transform.position.y;
-            }
-            
-            transform.position = newPosition;
+            // Movement is now handled by MovementComponent
         }
 
         public void ShowSpawnEffect(Vector3 position)
@@ -259,5 +230,8 @@ namespace Actors
                 spawningPool.ReturnToPoolAfterDuration(spawnEffect, (particleSystem.main.duration + particleSystem.main.startDelay.constant) + 0.2f);
             }
         }
+        
+        public ElfConfigSO GetConfig() => _configSo;
+        public SpiderElfView GetView() => view;
     }
 }

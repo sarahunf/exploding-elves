@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26913b906c7ae2a47872c3e2103357d6, type: 3}
   m_Name: ElfConfig_Black
   m_EditorClassIdentifier: 
+  movementStrategy: {fileID: 11400000, guid: 25829695dbb02944eabed7b0a978e066, type: 2}
   moveSpeed: 4
   randomDirectionChangeInterval: 1
   replicationCooldown: 2

@@ -6,12 +6,13 @@ using UnityEngine;
 using System.Collections;
 using Manager;
 using Actors.Enum;
+using UnityEngine.Serialization;
 
 namespace Spawner
 {
     public class Spawner : MonoBehaviour, ISpawner
     {
-        [SerializeField] private SpawnerConfig config;
+        [FormerlySerializedAs("config")] [SerializeField] private SpawnerConfigSO _configSo;
         
         private IEntityFactory entityFactory;
         private Coroutine spawnCoroutine;
@@ -89,33 +90,33 @@ namespace Spawner
         {
             while (true)
             {
-                if (EntityCounter.Instance.CanSpawnEntity(config.entityType, config.maxEntities))
+                if (EntityCounter.Instance.CanSpawnEntity(_configSo.entityType, _configSo.maxEntities))
                 {
                     SpawnEntity();
                 }
-                yield return new WaitForSeconds(config.spawnInterval);
+                yield return new WaitForSeconds(_configSo.spawnInterval);
             }
         }
         
         private void SpawnEntity()
         {
-            var entity = entityFactory?.CreateEntity(config.entityType);
+            var entity = entityFactory?.CreateEntity(_configSo.entityType);
             if (entity == null)
             {
                 return;
             }
             
-            var spawnPosition = GetValidSpawnPosition(transform.position, config.spawnAreaSize.x);
+            var spawnPosition = GetValidSpawnPosition(transform.position, _configSo.spawnAreaSize.x);
             if (!spawnPosition.HasValue) return;
             
             entity.Initialize(spawnPosition.Value);
-            EntityCounter.Instance.OnEntitySpawned(config.entityType);
-            OnEntitySpawned?.Invoke(config.entityType);
+            EntityCounter.Instance.OnEntitySpawned(_configSo.entityType);
+            OnEntitySpawned?.Invoke(_configSo.entityType);
         }
 
         public void SetSpawnInterval(float interval)
         {
-            config.spawnInterval = interval;
+            _configSo.spawnInterval = interval;
             StartSpawning();
         }
 
@@ -126,12 +127,12 @@ namespace Spawner
         
         public EntityType GetEntityType()
         {
-            return config.entityType;
+            return _configSo.entityType;
         }
 
-        public SpawnerConfig GetConfig()
+        public SpawnerConfigSO GetConfig()
         {
-            return config;
+            return _configSo;
         }
     }
 }
