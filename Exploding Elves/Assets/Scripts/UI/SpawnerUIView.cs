@@ -11,7 +11,8 @@ namespace UI
         [SerializeField] private TMP_Text nameText;
         [SerializeField] private Slider intervalSlider;
         [SerializeField] private TMP_Text intervalText;
-        [SerializeField] private Image colorIndicator;
+        [SerializeField] private ColorIndicator colorIndicator;
+        [SerializeField] private ColorIndicator worldColorIndicator;
         [SerializeField] private TMP_Text countText;
 
         private SpawnerUIViewModel viewModel;
@@ -41,12 +42,17 @@ namespace UI
             if (nameText != null)
             {
                 nameText.text = viewModel.SpawnerName;
+                nameText.color = viewModel.IndicatorColor;
             }
 
             if (colorIndicator != null)
             {
-                nameText!.color = viewModel.IndicatorColor;
-                colorIndicator.color = viewModel.IndicatorColor;
+                colorIndicator.SetColor(viewModel.IndicatorColor);
+            }
+            
+            if (worldColorIndicator != null)
+            {
+                worldColorIndicator.SetColor(viewModel.IndicatorColor);
             }
 
             if (intervalSlider != null)
