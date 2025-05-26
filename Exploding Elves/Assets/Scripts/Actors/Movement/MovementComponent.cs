@@ -1,4 +1,5 @@
 using Actors.Movement;
+using Actors.Movement.Commands;
 using Config;
 using UnityEngine;
 
@@ -11,6 +12,14 @@ namespace Actors
         private Vector3 currentDirection;
         private float nextDirectionChangeTime;
         private Vector3 lastPosition;
+        private MovementCommandInvoker commandInvoker;
+        
+        // Cached vectors to reduce GC
+        private readonly Vector3 upOffset = new Vector3(0, 0.1f, 0);
+        private readonly Vector3 raycastOffset = new Vector3(0, 0.5f, 0);
+        private Vector3 tempPosition;
+        private Vector3 tempDirection;
+        private Vector3 tempReflection;
         
         // Boundary constraints
         private const float BOUNDARY_MARGIN = 0.5f;
@@ -19,6 +28,7 @@ namespace Actors
         private void Awake()
         {
             elf = GetComponent<Elf>();
+            commandInvoker = new MovementCommandInvoker();
             InitializeBoundaries();
         }
 
@@ -61,28 +71,33 @@ namespace Actors
         {
             Move();
             UpdateWalkingState();
+            commandInvoker.ProcessCommands();
         }
         
         private void Move()
         {
             var config = elf.GetConfig();
-            Vector3 newPosition;
+            tempPosition = transform.position;
 
             if (config.movementStrategy == null)
             {
-                newPosition = CalculateDefaultMovement(config);
+                tempPosition = CalculateDefaultMovement(config);
             }
             else
             {
-                newPosition = CalculateStrategyMovement(config);
+                tempPosition = CalculateStrategyMovement(config);
             }
             
             // Apply boundary constraints and ground height
-            newPosition = ConstrainToBoundaries(newPosition);
-            newPosition = AdjustGroundHeight(newPosition);
+            tempPosition = ConstrainToBoundaries(tempPosition);
+            tempPosition = AdjustGroundHeight(tempPosition);
             
-            // Update position and rotation
-            UpdatePositionAndRotation(newPosition, config.movementStrategy);
+            // Create and queue movement command
+            Quaternion targetRotation = config.movementStrategy?.CalculateRotation(tempPosition - transform.position) 
+                ?? Quaternion.LookRotation(tempPosition - transform.position);
+            
+            var moveCommand = new MoveCommand(this, tempPosition, targetRotation);
+            commandInvoker.AddCommand(moveCommand);
         }
 
         private Vector3 CalculateDefaultMovement(ElfConfigSO configSo)
@@ -124,17 +139,6 @@ namespace Actors
                 position.y = transform.position.y;
             }
             return position;
-        }
-
-        private void UpdatePositionAndRotation(Vector3 newPosition, MovementStrategySO strategy)
-        {
-            Vector3 movement = newPosition - transform.position;
-            if (movement != Vector3.zero)
-            {
-                Quaternion targetRotation = strategy?.CalculateRotation(movement) ?? Quaternion.LookRotation(movement);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
-            }
-            transform.position = newPosition;
         }
 
         private Vector3 ConstrainToBoundaries(Vector3 position)
@@ -192,6 +196,16 @@ namespace Actors
         public void SetNextDirectionChangeTime(float time)
         {
             nextDirectionChangeTime = time;
+        }
+
+        public void SetPosition(Vector3 position)
+        {
+            transform.position = position;
+        }
+
+        public void SetRotation(Quaternion rotation)
+        {
+            transform.rotation = rotation;
         }
     }
 } 
