@@ -8,18 +8,16 @@ namespace UI
     {
         [Header("UI Panels")]
         [SerializeField] private GameObject pausePanel;
-        [SerializeField] private GameObject gameOverPanel;
         
         [Header("Buttons")]
-        [SerializeField] private Button pauseButton;
-        [SerializeField] private Button resumeButton;
+        [SerializeField] private Button playPauseButton;
+        [SerializeField] private TextMeshProUGUI playPauseButtonText;
         [SerializeField] private Button restartButton;
         [SerializeField] private Button quitButton;
-        
-        [Header("Game Over UI")]
-        [SerializeField] private TextMeshProUGUI gameOverText;
+        [SerializeField] private Button togglePanelButton;
         
         private GameViewModel viewModel;
+        private bool isPanelOpen = false;
         
         private void Awake()
         {
@@ -35,18 +33,20 @@ namespace UI
 
         private void SetupUI()
         {
-            // Hide panels initially
+            // Hide panel initially
             if (pausePanel) pausePanel.SetActive(false);
-            if (gameOverPanel) gameOverPanel.SetActive(false);
+            
+            // Set initial button texts
+            UpdatePlayPauseButtonText(false);
         }
 
         private void SetupEventListeners()
         {
             // Button listeners
-            if (pauseButton) pauseButton.onClick.AddListener(OnPauseButtonClicked);
-            if (resumeButton) resumeButton.onClick.AddListener(OnResumeButtonClicked);
+            if (playPauseButton) playPauseButton.onClick.AddListener(OnPlayPauseButtonClicked);
             if (restartButton) restartButton.onClick.AddListener(OnRestartButtonClicked);
             if (quitButton) quitButton.onClick.AddListener(OnQuitButtonClicked);
+            if (togglePanelButton) togglePanelButton.onClick.AddListener(OnTogglePanelButtonClicked);
             
             // ViewModel event listeners
             viewModel.OnPauseStateChanged += HandlePauseStateChanged;
@@ -56,19 +56,14 @@ namespace UI
 
         private void Update()
         {
-            // Handle escape key for pause
+            // Handle escape key for panel toggle
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                viewModel.TogglePause();
+                TogglePanel();
             }
         }
 
-        private void OnPauseButtonClicked()
-        {
-            viewModel.TogglePause();
-        }
-
-        private void OnResumeButtonClicked()
+        private void OnPlayPauseButtonClicked()
         {
             viewModel.TogglePause();
         }
@@ -83,15 +78,36 @@ namespace UI
             viewModel.QuitGame();
         }
 
+        private void OnTogglePanelButtonClicked()
+        {
+            TogglePanel();
+        }
+
+        private void TogglePanel()
+        {
+            isPanelOpen = !isPanelOpen;
+            if (pausePanel) pausePanel.SetActive(isPanelOpen);
+        }
+
+
         private void HandlePauseStateChanged(bool isPaused)
         {
-            if (pausePanel) pausePanel.SetActive(isPaused);
+            UpdatePlayPauseButtonText(isPaused);
+        }
+
+        private void UpdatePlayPauseButtonText(bool isPaused)
+        {
+            if (playPauseButtonText != null)
+            {
+                playPauseButtonText.text = isPaused ? "Play" : "Pause";
+            }
         }
 
         private void HandleGameRestarted()
         {
             if (pausePanel) pausePanel.SetActive(false);
-            if (gameOverPanel) gameOverPanel.SetActive(false);
+            isPanelOpen = false;
+            UpdatePlayPauseButtonText(false);
         }
 
         private void HandleGameQuit()
@@ -102,10 +118,10 @@ namespace UI
         private void OnDestroy()
         {
             // Clean up event listeners
-            if (pauseButton) pauseButton.onClick.RemoveListener(OnPauseButtonClicked);
-            if (resumeButton) resumeButton.onClick.RemoveListener(OnResumeButtonClicked);
+            if (playPauseButton) playPauseButton.onClick.RemoveListener(OnPlayPauseButtonClicked);
             if (restartButton) restartButton.onClick.RemoveListener(OnRestartButtonClicked);
             if (quitButton) quitButton.onClick.RemoveListener(OnQuitButtonClicked);
+            if (togglePanelButton) togglePanelButton.onClick.RemoveListener(OnTogglePanelButtonClicked);
             
             if (viewModel != null)
             {
