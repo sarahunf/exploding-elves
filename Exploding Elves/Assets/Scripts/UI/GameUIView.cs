@@ -17,7 +17,6 @@ namespace UI
         [SerializeField] private Button togglePanelButton;
         
         private GameViewModel viewModel;
-        private bool isPanelOpen = false;
         
         private void Awake()
         {
@@ -85,10 +84,8 @@ namespace UI
 
         private void TogglePanel()
         {
-            isPanelOpen = !isPanelOpen;
-            if (pausePanel) pausePanel.SetActive(isPanelOpen);
+            if (pausePanel) pausePanel.SetActive(!pausePanel.activeSelf);
         }
-
 
         private void HandlePauseStateChanged(bool isPaused)
         {
@@ -106,7 +103,6 @@ namespace UI
         private void HandleGameRestarted()
         {
             if (pausePanel) pausePanel.SetActive(false);
-            isPanelOpen = false;
             UpdatePlayPauseButtonText(false);
         }
 

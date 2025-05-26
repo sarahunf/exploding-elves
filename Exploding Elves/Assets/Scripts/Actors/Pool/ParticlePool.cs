@@ -8,23 +8,17 @@ namespace Actors.Pool
     {
         [SerializeField] private GameObject prefab;
         [SerializeField] private int initialSize = 10;
+        [SerializeField] private int maxPoolSize = 50;
 
         private readonly Queue<GameObject> pool = new();
+        private readonly HashSet<GameObject> activeObjects = new();
 
         public void Initialize(GameObject prefab, int size)
         {
-            if (prefab == null)
-            {
-                return;
-            }
-
-            if (prefab.GetComponent<ParticleSystem>() == null)
-            {
-                return;
-            }
+            if (prefab == null || prefab.GetComponent<ParticleSystem>() == null) return;
 
             this.prefab = prefab;
-            initialSize = size;
+            initialSize = Mathf.Min(size, maxPoolSize);
             
             for (int i = 0; i < initialSize; i++)
             {
@@ -54,10 +48,17 @@ namespace Actors.Pool
         {
             if (pool.Count == 0)
             {
-                return CreateNew();
+                if (activeObjects.Count < maxPoolSize)
+                {
+                    var newObj = CreateNew();
+                    activeObjects.Add(newObj);
+                    return newObj;
+                }
+                return null;
             }
 
             var obj = pool.Dequeue();
+            activeObjects.Add(obj);
             obj.SetActive(true);
             return obj;
         }
@@ -66,11 +67,15 @@ namespace Actors.Pool
         {
             if (obj == null) return;
 
+            if (activeObjects.Contains(obj))
+            {
+                activeObjects.Remove(obj);
+            }
+
             var ps = obj.GetComponent<ParticleSystem>();
             if (ps != null)
             {
-                ps.Stop();
-                ps.Clear();
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
 
             obj.SetActive(false);
@@ -91,7 +96,14 @@ namespace Actors.Pool
 
         private void AddToPool(GameObject obj)
         {
-            pool.Enqueue(obj);
+            if (pool.Count < maxPoolSize)
+            {
+                pool.Enqueue(obj);
+            }
+            else
+            {
+                Destroy(obj);
+            }
         }
     }
 } 

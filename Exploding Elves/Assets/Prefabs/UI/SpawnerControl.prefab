@@ -280,7 +280,6 @@ MonoBehaviour:
   indicatorImage: {fileID: 8673355264638752104}
   shouldAnimate: 0
   animationDuration: 0.5
-  animationDistance: 10
 --- !u!1 &6135812451997859921
 GameObject:
   m_ObjectHideFlags: 0
@@ -522,6 +521,7 @@ MonoBehaviour:
   intervalSlider: {fileID: 6649430063001666808}
   intervalText: {fileID: 8896081780494342615}
   colorIndicator: {fileID: 1595440964057634095}
+  worldColorIndicator: {fileID: 0}
   countText: {fileID: 8543800864797310161}
 --- !u!114 &8283865265643999387
 MonoBehaviour:
@@ -538,7 +538,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 5
     m_Right: 5
-    m_Top: 5
+    m_Top: 15
     m_Bottom: 0
   m_ChildAlignment: 1
   m_Spacing: 0
@@ -786,7 +786,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0

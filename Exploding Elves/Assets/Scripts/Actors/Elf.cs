@@ -141,34 +141,27 @@ namespace Actors
             if (explosionPool != null)
             {
                 var explosion = explosionPool.Get();
-                if (explosion == null)
+                if (explosion != null)
                 {
-                    return;
-                }
-                
-                explosion.transform.position = transform.position;
-                var particleSystem = explosion.GetComponent<ParticleSystem>();
-                if (particleSystem != null)
-                {
-                    particleSystem.Play();
-                    explosionPool.ReturnToPoolAfterDuration(explosion, (particleSystem.main.duration + particleSystem.main.startDelay.constant) + 0.2f);
+                    explosion.transform.position = transform.position;
+                    var particleSystem = explosion.GetComponent<ParticleSystem>();
+                    if (particleSystem != null)
+                    {
+                        var main = particleSystem.main;
+                        particleSystem.Play();
+                        explosionPool.ReturnToPoolAfterDuration(explosion, (main.duration + main.startDelay.constant) + 0.2f);
+                    }
                 }
             }
             
-            if (view != null) {
-                view.AttackAndDestroy(OnAttackFinished);
-            } else {
-                StartCoroutine(DelayedReturn());
-            }
-        }
-        private void OnAttackFinished()
-        {
+            // Wait for collision handling to complete before returning to pool
             StartCoroutine(DelayedReturn());
         }
 
         private IEnumerator DelayedReturn()
         {
-            yield return new WaitForSeconds(0.1f);
+            // Wait for one frame to ensure collision handling is complete
+            yield return null;
             
             if (isExploding)  // Prevent multiple returns
             {
@@ -185,24 +178,29 @@ namespace Actors
 
         private void OnTriggerEnter(Collider other)
         {
+            if (isExploding || !canReplicate) return;
+
             var otherElf = other.GetComponent<Elf>();
             if (otherElf == null)
             {
                 otherElf = other.GetComponentInParent<Elf>();
+                if (otherElf == null)
+                {
+                    if (other.CompareTag("Rock"))
+                    {
+                        HandleRockCollision(other);
+                    }
+                    return;
+                }
             }
             
-            if (otherElf != null)
-            {
-                OnCollision(otherElf);
-            }
-            else if (other.CompareTag($"Rock"))
-            {
-                HandleRockCollision(other);
-            }
+            OnCollision(otherElf);
         }
 
         private void HandleRockCollision(Collider rock)
         {
+            if (movementComponent == null) return;
+
             Vector3 collisionNormal = (transform.position - rock.transform.position).normalized;
             Vector3 currentDirection = movementComponent.GetCurrentDirection();
             float yDirection = currentDirection.y;
@@ -237,8 +235,9 @@ namespace Actors
             var particleSystem = spawnEffect.GetComponent<ParticleSystem>();
             if (particleSystem != null)
             {
+                var main = particleSystem.main;
                 particleSystem.Play();
-                spawningPool.ReturnToPoolAfterDuration(spawnEffect, (particleSystem.main.duration + particleSystem.main.startDelay.constant) + 0.2f);
+                spawningPool.ReturnToPoolAfterDuration(spawnEffect, (main.duration + main.startDelay.constant) + 0.2f);
             }
         }
         
