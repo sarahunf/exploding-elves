@@ -7,16 +7,14 @@ using Actors.Components;
 using Config;
 using UnityEngine;
 using UnityEngine.Serialization;
-using IPool = Actors.Pool.IPool;
-using IPoolable = Actors.Pool.IPoolable;
 
 namespace Actors
 {
     public class Elf : Entity, IPoolable
     {
         [FormerlySerializedAs("config")] [SerializeField] private ElfConfigSO _configSo;
-        [SerializeField] private SpiderElfView view;
         
+        private SpiderElfView view;
         private MovementComponent movementComponent;
         private ElfStateMachine stateMachine;
         private CollisionHandler collisionHandler;
@@ -29,6 +27,7 @@ namespace Actors
         private void Awake()
         {
             entityType = _configSo.type;
+            view = GetComponentInChildren<SpiderElfView>();
             movementComponent = GetComponent<MovementComponent>();
             collisionHandler = GetComponent<CollisionHandler>();
             particleHandler = GetComponent<ParticleEffectHandler>();

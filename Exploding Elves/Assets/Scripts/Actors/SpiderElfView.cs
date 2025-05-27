@@ -75,32 +75,5 @@ namespace Actors
                 spiderAnimator.SetBool(walkingBool, isWalking);
             }
         }
-        
-        public void AttackAndDestroy(Action OnFinished = null)
-        {
-            if (spiderAnimator != null)
-            {
-                spiderAnimator.SetTrigger(attackTrigger);
-                StartCoroutine(DestroyAfterAttack(OnFinished));
-            }
-        }
-
-        private IEnumerator DestroyAfterAttack(Action OnFinished = null)
-        {
-            if (spiderAnimator != null)
-            {
-                float attackLength = 0.5f;
-                foreach (var clip in spiderAnimator.runtimeAnimatorController.animationClips)
-                {
-                    if (clip.name == attackTrigger)
-                    {
-                        attackLength = clip.length;
-                        break;
-                    }
-                }
-                yield return new WaitForSeconds(attackLength);
-            }
-            OnFinished?.Invoke();
-        }
     }
 } 

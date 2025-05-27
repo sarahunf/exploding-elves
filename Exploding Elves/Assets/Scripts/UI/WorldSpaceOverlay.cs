@@ -1,47 +1,49 @@
 using UnityEngine;
 using UnityEngine.UI;
-
-public class WorldSpaceOverlay : MonoBehaviour
+namespace UI
 {
-    [SerializeField] private Transform worldObjectToTrack;
-    [SerializeField] private Canvas targetCanvas;
-    [SerializeField] private Image overlayImage;
-    [SerializeField] private Vector3 offset = Vector3.zero;
+    public class WorldSpaceOverlay : MonoBehaviour
+    {
+        [SerializeField] private Transform worldObjectToTrack;
+        [SerializeField] private Canvas targetCanvas;
+        [SerializeField] private Image overlayImage;
+        [SerializeField] private Vector3 offset = Vector3.zero;
     
-    private RectTransform rectTransform;
-    private Camera mainCamera;
+        private RectTransform rectTransform;
+        private Camera mainCamera;
 
-    private void Awake()
-    {
-        rectTransform = GetComponent<RectTransform>();
-        mainCamera = Camera.main;
-    }
-
-    private void Start()
-    {
-        if (worldObjectToTrack == null || targetCanvas == null || overlayImage == null) return;
-        
-        if (!worldObjectToTrack.gameObject.activeSelf)
+        private void Awake()
         {
-            overlayImage.enabled = false;
-            return;
-        }
-        
-        var screenPos = mainCamera.WorldToScreenPoint(worldObjectToTrack.position + offset);
-        if (screenPos.z < 0)
-        {
-            overlayImage.enabled = false;
-            return;
+            rectTransform = GetComponent<RectTransform>();
+            mainCamera = Camera.main;
         }
 
-        overlayImage.enabled = true;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            targetCanvas.GetComponent<RectTransform>(),
-            screenPos,
-            targetCanvas.worldCamera,
-            out var canvasPos
-        );
+        private void Start()
+        {
+            if (worldObjectToTrack == null || targetCanvas == null || overlayImage == null) return;
         
-        rectTransform.anchoredPosition = canvasPos;
+            if (!worldObjectToTrack.gameObject.activeSelf)
+            {
+                overlayImage.enabled = false;
+                return;
+            }
+        
+            var screenPos = mainCamera.WorldToScreenPoint(worldObjectToTrack.position + offset);
+            if (screenPos.z < 0)
+            {
+                overlayImage.enabled = false;
+                return;
+            }
+
+            overlayImage.enabled = true;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                targetCanvas.GetComponent<RectTransform>(),
+                screenPos,
+                targetCanvas.worldCamera,
+                out var canvasPos
+            );
+        
+            rectTransform.anchoredPosition = canvasPos;
+        }
     }
 } 

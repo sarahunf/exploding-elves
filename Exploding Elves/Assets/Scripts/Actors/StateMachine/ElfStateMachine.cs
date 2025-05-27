@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using Actors.Enum;
 
@@ -62,8 +61,6 @@ namespace Actors.StateMachine
             switch (currentState)
             {
                 case ElfState.Spawning:
-                    SetState(ElfState.Idle);
-                    break;
                 case ElfState.Replicating:
                     SetState(ElfState.Idle);
                     break;
