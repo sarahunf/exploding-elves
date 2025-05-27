@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48c7da4aaa20401448be4ff5f3d009b9, type: 3}
   m_Name: AttackMovementStrategy
   m_EditorClassIdentifier: 
-  moveSpeed: 4
   directionChangeInterval: 1
-  chargeSpeed: 8
+  chargeSpeed: 6
   chargeDuration: 1
   cooldownDuration: 2
   detectionRadius: 50
