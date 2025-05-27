@@ -7,7 +7,7 @@ namespace Actors.Movement
         [Header("Base Movement Settings")]
         public float directionChangeInterval = 1f;
         
-        public abstract Vector3 CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime);
+        public abstract IMovementStrategy.MovementResult CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime);
         public abstract Vector3 CalculateDirection(Vector3 currentDirection, float deltaTime);
         
         public virtual Quaternion CalculateRotation(Vector3 movement)

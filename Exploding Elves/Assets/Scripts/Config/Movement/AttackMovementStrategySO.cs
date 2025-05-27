@@ -37,7 +37,7 @@ namespace Actors.Movement
         private float noTargetTimer;
         private const float TARGET_SEARCH_INTERVAL = 0.5f;
         
-        public override Vector3 CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime)
+        public override IMovementStrategy.MovementResult CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime)
         {
             UpdateTargetSearch(deltaTime);
             UpdateTargetStatus();
@@ -47,7 +47,8 @@ namespace Actors.Movement
                 noTargetTimer += deltaTime;
                 if (noTargetTimer >= defaultStrategyDelay && defaultStrategy != null)
                 {
-                    return defaultStrategy.CalculateMovement(currentPosition, currentDirection, moveSpeed, deltaTime);
+                    var result = defaultStrategy.CalculateMovement(currentPosition, currentDirection, moveSpeed, deltaTime);
+                    return new IMovementStrategy.MovementResult(result.position, result.direction);
                 }
             }
             else
@@ -60,7 +61,8 @@ namespace Actors.Movement
             
             UpdateChargeState(deltaTime);
             
-            return currentPosition + targetDirection * (currentSpeed * deltaTime);
+            var newPosition = currentPosition + targetDirection * (currentSpeed * deltaTime);
+            return new IMovementStrategy.MovementResult(newPosition, targetDirection);
         }
         
         private void UpdateTargetSearch(float deltaTime)

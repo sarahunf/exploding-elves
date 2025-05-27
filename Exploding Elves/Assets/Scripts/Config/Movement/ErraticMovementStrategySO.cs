@@ -12,7 +12,7 @@ namespace Actors.Movement
         [Tooltip("How far to check for obstacles")]
         public float raycastDistance = 1f;
         
-        public override Vector3 CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime)
+        public override IMovementStrategy.MovementResult CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime)
         {
             bool isNearRock = Physics.Raycast(currentPosition + Vector3.up * 0.1f, currentDirection, out var hit, raycastDistance) && hit.collider.CompareTag("Rock");
             if (isNearRock)
@@ -25,10 +25,10 @@ namespace Actors.Movement
             
             if (Physics.Raycast(newPosition + Vector3.up * 0.1f, Vector3.zero, out var finalHit, 0.1f) && finalHit.collider.CompareTag("Rock"))
             {
-                return currentPosition;
+                return new IMovementStrategy.MovementResult(currentPosition, currentDirection);
             }
             
-            return newPosition;
+            return new IMovementStrategy.MovementResult(newPosition, currentDirection);
         }
         
         public override Vector3 CalculateDirection(Vector3 currentDirection, float deltaTime)

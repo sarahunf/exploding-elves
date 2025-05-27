@@ -105,8 +105,9 @@ namespace Actors
                 currentDirection = configSo.movementStrategy.CalculateDirection(currentDirection, Time.deltaTime);
                 nextDirectionChangeTime = Time.time + configSo.movementStrategy.directionChangeInterval;
             }
-
-            return configSo.movementStrategy.CalculateMovement(transform.position, currentDirection, configSo.moveSpeed, Time.deltaTime);
+            var result = configSo.movementStrategy.CalculateMovement(transform.position, currentDirection, configSo.moveSpeed, Time.deltaTime);
+            currentDirection = result.direction;
+            return result.position;
         }
 
         private Vector3 AdjustGroundHeight(Vector3 position)

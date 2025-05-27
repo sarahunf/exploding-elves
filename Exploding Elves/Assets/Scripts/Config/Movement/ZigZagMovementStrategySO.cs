@@ -46,14 +46,12 @@ namespace Actors.Movement
             return instanceData[instanceId];
         }
         
-        public override Vector3 CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime)
+        public override IMovementStrategy.MovementResult CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime)
         {
             Elf elf = FindElfAtPosition(currentPosition);
             if (elf == null) 
-                return currentPosition;
-            
+                return new IMovementStrategy.MovementResult(currentPosition, currentDirection);
             var data = GetInstanceData(elf);
-            
             if (!data.hasInitialized)
             {
                 data.baseDirection = new Vector3(
@@ -61,27 +59,21 @@ namespace Actors.Movement
                     0,
                     Random.Range(-1f, 1f)
                 ).normalized;
-                
                 data.currentZigzagAngle = Random.Range(0f, 360f);
                 data.hasInitialized = true;
                 data.lastSafePosition = currentPosition;
             }
-            
             var currentZigzagDirection = GetZigzagDirection(data);
             bool isNearWall = Physics.Raycast(currentPosition + Vector3.up * 0.1f, currentZigzagDirection, out var hit, raycastDistance, obstacleLayer);
-            
             if (isNearWall)
             {
                 data.isZigging = !data.isZigging;
-                
                 var hitNormal = hit.normal;
                 data.baseDirection = Vector3.Reflect(currentZigzagDirection, hitNormal);
                 data.baseDirection.y = 0;
                 data.baseDirection.Normalize();
-                
                 currentPosition += hitNormal * wallAvoidanceDistance;
             }
-            
             float distanceMoved = Vector3.Distance(currentPosition, data.lastSafePosition);
             if (distanceMoved < 0.01f)
             {
@@ -99,7 +91,6 @@ namespace Actors.Movement
                             break;
                         }
                     }
-                    
                     if (escapeDirection != Vector3.zero)
                     {
                         currentPosition += escapeDirection * (moveSpeed * deltaTime * positionCorrectionStrength);
@@ -110,7 +101,6 @@ namespace Actors.Movement
                     {
                         currentPosition = data.lastSafePosition;
                     }
-                    
                     data.stuckTimer = 0f;
                 }
             }
@@ -119,16 +109,13 @@ namespace Actors.Movement
                 data.stuckTimer = 0f;
                 data.lastSafePosition = currentPosition;
             }
-            
             var horizontalMovement = currentZigzagDirection * (moveSpeed * deltaTime);
             var newPosition = currentPosition + horizontalMovement;
-
             if (Physics.Raycast(newPosition + Vector3.up * 0.1f, Vector3.zero, 0.1f, obstacleLayer))
             {
-                return currentPosition;
+                return new IMovementStrategy.MovementResult(currentPosition, currentZigzagDirection);
             }
-            
-            return newPosition;
+            return new IMovementStrategy.MovementResult(newPosition, currentZigzagDirection);
         }
         
         private Elf FindElfAtPosition(Vector3 position)
