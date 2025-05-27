@@ -19,9 +19,14 @@ public class WorldSpaceOverlay : MonoBehaviour
 
     private void Start()
     {
-        if (worldObjectToTrack == null || targetCanvas == null || overlayImage == null)
+        if (worldObjectToTrack == null || targetCanvas == null || overlayImage == null) return;
+        
+        if (!worldObjectToTrack.gameObject.activeSelf)
+        {
+            overlayImage.enabled = false;
             return;
-
+        }
+        
         var screenPos = mainCamera.WorldToScreenPoint(worldObjectToTrack.position + offset);
         if (screenPos.z < 0)
         {
