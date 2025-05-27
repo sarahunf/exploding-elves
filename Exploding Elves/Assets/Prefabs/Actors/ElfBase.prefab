@@ -55,10 +55,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.19
-  m_Height: 0.61
+  m_Radius: 0.28
+  m_Height: 1.26
   m_Direction: 2
-  m_Center: {x: 0, y: 0.18, z: -0.08}
+  m_Center: {x: 0, y: 0.24, z: -0.08}
 --- !u!54 &3197187093432742725
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -87,10 +87,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1bbde7b50e74226aa8b45fc4dc32be9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 4
-  randomDirectionChangeInterval: 1
-  boundaryArea: 50
-  config: {fileID: 0}
+  _configSo: {fileID: 0}
   view: {fileID: 7461957396296111874}
 --- !u!114 &8804347697731750684
 MonoBehaviour:
@@ -117,15 +114,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8769b30c9fe1eb64b9ca94c82a128465, type: 3}
       propertyPath: m_LocalPosition.x
