@@ -108,7 +108,7 @@ namespace Spawner
             }
         }
         
-        private void SpawnEntity()
+        public void SpawnEntity()
         {
             var entity = entityFactory?.CreateEntity(_configSo.entityType);
             if (entity == null)
