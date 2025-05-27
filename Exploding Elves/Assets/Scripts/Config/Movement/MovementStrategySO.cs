@@ -5,7 +5,6 @@ namespace Actors.Movement
     public abstract class MovementStrategySO : ScriptableObject, IMovementStrategy
     {
         [Header("Base Movement Settings")]
-        public float moveSpeed = 4f;
         public float directionChangeInterval = 1f;
         
         public abstract Vector3 CalculateMovement(Vector3 currentPosition, Vector3 currentDirection, float moveSpeed, float deltaTime);

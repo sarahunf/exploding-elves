@@ -1,14 +1,16 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Actors.Enum;
 using Actors.Interface;
-using UnityEngine;
-using System;
-using System.Collections.Generic;
-using IPool = Actors.Pool.IPool;
-using IPoolable = Actors.Pool.IPoolable;
+using Actors.StateMachine;
 using Actors.Pool;
 using Config;
+using UnityEngine;
 using UnityEngine.Serialization;
+using IPool = Actors.Pool.IPool;
+using IPoolable = Actors.Pool.IPoolable;
+
 
 namespace Actors
 {
@@ -19,10 +21,9 @@ namespace Actors
         private ParticlePool explosionPool;
         private ParticlePool spawningPool;
         private MovementComponent movementComponent;
+        private ElfStateMachine stateMachine;
         
         private IPool pool;
-        private bool isExploding;
-        private bool canReplicate;
         private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
         private static float lastCleanupTime = 0f;
         
@@ -33,6 +34,7 @@ namespace Actors
         {
             entityType = _configSo.type;
             movementComponent = GetComponent<MovementComponent>();
+            stateMachine = new ElfStateMachine(this);
         }
 
         public void InitializePools(ParticlePool explosionPool, ParticlePool spawningPool)
@@ -48,36 +50,26 @@ namespace Actors
                 processedCollisions.Clear();
                 lastCleanupTime = Time.time;
             }
+
+            stateMachine.Update();
         }
         
         private void OnEnable()
         {
-            isExploding = false;
-            canReplicate = false;  // Start with replication disabled
+            stateMachine.SetState(ElfState.Spawning, 2f);
             view.SetBodyColor(_configSo.body);
             view.SetHighlightColor(_configSo.highlight);
-            view.SetEmission(true, _configSo.body * 2f); // Enable emission with brighter version of body color
-            view.SetScale(false); // Start with smaller scale
             
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out var hit, 1f))
             {
                 Vector3 newPos = new Vector3(transform.position.x, hit.point.y + 0.1f, transform.position.z);
                 transform.position = newPos;
             }
-            StartCoroutine(SpawnCooldown());
-        }
-        
-        private IEnumerator SpawnCooldown()
-        {
-            yield return new WaitForSeconds(2f);
-            canReplicate = true;
-            view.SetEmission(false, Color.black);
-            view.SetScale(true); // Scale up when can replicate
         }
         
         public override void OnCollision(IEntity other)
         {
-            if (isExploding || !canReplicate)
+            if (!stateMachine.CanReplicate())
             { 
                 return;
             }
@@ -101,8 +93,8 @@ namespace Actors
             {
                 OnElfReplication?.Invoke(entityType, transform.position);
                 
-                StartCoroutine(ReplicationCooldown());
-                otherElf.StartCoroutine(otherElf.ReplicationCooldown());
+                stateMachine.SetState(ElfState.Replicating, _configSo.replicationCooldown);
+                otherElf.stateMachine.SetState(ElfState.Replicating, _configSo.replicationCooldown);
             }
             else
             {
@@ -110,17 +102,6 @@ namespace Actors
                 otherElf.Explode();
             }
             StartCoroutine(RemoveCollisionId(collisionId));
-        }
-
-        private IEnumerator ReplicationCooldown()
-        {
-            canReplicate = false;
-            view.SetEmission(true, _configSo.body * 2f);
-            view.SetScale(false); // Scale down when can't replicate
-            yield return new WaitForSeconds(_configSo.replicationCooldown);
-            canReplicate = true;
-            view.SetEmission(false, Color.black);
-            view.SetScale(true); // Scale up when can replicate again
         }
 
         private IEnumerator RemoveCollisionId((int, int) collisionId)
@@ -134,9 +115,9 @@ namespace Actors
 
         private void Explode()
         {
-            if (isExploding) return;
+            if (stateMachine.GetCurrentState() == ElfState.Exploding) return;
             
-            isExploding = true;
+            stateMachine.SetState(ElfState.Exploding);
 
             if (explosionPool != null)
             {
@@ -154,31 +135,26 @@ namespace Actors
                 }
             }
             
-            // Wait for collision handling to complete before returning to pool
             StartCoroutine(DelayedReturn());
         }
 
         private IEnumerator DelayedReturn()
         {
-            // Wait for one frame to ensure collision handling is complete
             yield return null;
             
-            if (isExploding)  // Prevent multiple returns
+            if (stateMachine.GetCurrentState() == ElfState.Exploding)
             {
                 Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
                 OnEntityDestroyed?.Invoke(entityType);
                 
-                // Reset state before returning to pool
-                isExploding = false;
-                canReplicate = true;
-                
+                stateMachine.SetState(ElfState.Spawning, 2f);
                 ReturnToPool();
             }
         }
 
         private void OnTriggerEnter(Collider other)
         {
-            if (isExploding || !canReplicate) return;
+            if (!stateMachine.CanReplicate()) return;
 
             var otherElf = other.GetComponent<Elf>();
             if (otherElf == null)
