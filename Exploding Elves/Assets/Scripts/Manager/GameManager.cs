@@ -1,23 +1,20 @@
-﻿using Actors;
-using Actors.Enum;
-using Actors.Factory;
-using Actors.Pool;
-using UnityEngine;
-using Config;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using UI;
+using Actors.Pool;
 namespace Manager
 {
     public class GameManager : MonoBehaviour
     {
-        [SerializeField] private Spawner.Spawner[] spawners;
-        [SerializeField] private ParticlePool explosionPool;
-        [SerializeField] private ParticlePool spawningPool;
+        [SerializeField] private UIManager uiManager;
+        [SerializeField] private ElfReplicationManager replicationManager;
+        [SerializeField] private ParticleManager particleManager;
+        [SerializeField] private SpawnManager spawnManager;
 
         private static GameManager instance;
         public static GameManager Instance => instance;
 
-        private bool isPaused = false;
+        private bool isPaused;
 
         private void Awake()
         {
@@ -29,72 +26,28 @@ namespace Manager
             {
                 Destroy(gameObject);
             }
+            InitializeManagers();
         }
 
-        public ParticlePool GetExplosionPool() => explosionPool;
-        public ParticlePool GetSpawningPool() => spawningPool;
-    
-        private void OnEnable()
+        private void InitializeManagers()
         {
-            Elf.OnElfReplication += HandleElfReplication;
-        }
-    
-        private void OnDisable()
-        {
-            Elf.OnElfReplication -= HandleElfReplication;
-        }
-    
-        private void HandleElfReplication(EntityType entityType, Vector3 position)
-        {
-            // Find the spawner config for this entity type
-            SpawnerConfigSO configSo = null;
-            foreach (var spawner in spawners)
+            if (uiManager != null)
             {
-                if (spawner.GetEntityType() == entityType)
-                {
-                    configSo = spawner.GetConfig();
-                    break;
-                }
-            }
-            
-            if (configSo == null) return;
-            
-            // Check if we can spawn more entities of this type
-            if (!EntityCounter.Instance.CanSpawnEntity(entityType, configSo.maxEntities))
-            {
-                return;
-            }
-            
-            var factory = FindObjectOfType<ElfFactory>();
-            if (factory == null) return;
-            
-            var newElf = factory.CreateEntity(entityType);
-            if (newElf == null) return;
-
-            var spawnPosition = Spawner.Spawner.GetValidSpawnPosition(position, 5f);
-            if (spawnPosition.HasValue)
-            {
-                newElf.Initialize(spawnPosition.Value);
-                if (newElf is Elf elf)
-                {
-                    elf.ShowSpawnEffect(spawnPosition.Value);
-                }
-                EntityCounter.Instance.OnEntitySpawned(entityType);
+                uiManager.SetGameManager(this);
             }
             else
             {
-                if (newElf is MonoBehaviour entityMono)
-                {
-                    Destroy(entityMono.gameObject);
-                }
+                Debug.LogError("UIManager reference not set in the inspector!");
             }
-        }
-    
-        public void SetSpawnerInterval(int spawnerIndex, float interval, bool resetTimer)
-        {
-            if (spawnerIndex >= 0 && spawnerIndex < spawners.Length)
+
+            if (particleManager == null)
             {
-                spawners[spawnerIndex].SetSpawnInterval(interval);
+                Debug.LogError("ParticleManager reference not set in the inspector!");
+            }
+
+            if (spawnManager == null)
+            {
+                Debug.LogError("SpawnManager reference not set in the inspector!");
             }
         }
 
@@ -131,6 +84,14 @@ namespace Manager
             #else
                 Application.Quit();
             #endif
+        }
+        
+        public ParticlePool GetExplosionPool() => particleManager?.GetExplosionPool();
+        public ParticlePool GetSpawningPool() => particleManager?.GetSpawningPool();
+        
+        public void SetSpawnerInterval(int spawnerIndex, float interval, bool resetTimer)
+        {
+            spawnManager?.SetSpawnerInterval(spawnerIndex, interval, resetTimer);
         }
     }
 }

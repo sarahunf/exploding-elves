@@ -3,6 +3,7 @@ using Actors.Enum;
 using Actors.Factory.Interface;
 using Actors.Interface;
 using Actors.Pool;
+using Manager;
 using UnityEngine;
 
 namespace Actors.Factory
@@ -41,8 +42,8 @@ namespace Actors.Factory
             if (entity is Elf elf)
             {
                 elf.InitializePools(
-                    Manager.GameManager.Instance.GetExplosionPool(),
-                    Manager.GameManager.Instance.GetSpawningPool()
+                    GameManager.Instance.GetExplosionPool(),
+                    GameManager.Instance.GetSpawningPool()
                 );
             }
             

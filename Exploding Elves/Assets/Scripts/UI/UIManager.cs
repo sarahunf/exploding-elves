@@ -18,9 +18,10 @@ namespace UI
         [SerializeField] private SpawnerUIConfig[] spawnerConfigs;
         [SerializeField] private GameManager gameManager;
     
-        private void Awake()
+        public void SetGameManager(GameManager manager)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = manager;
+            InitializeUI();
         }
 
         private void OnEnable()
@@ -54,16 +55,11 @@ namespace UI
             }
         }
     
-        private void Start()
-        {
-            InitializeUI();
-        }
-    
         private void InitializeUI()
         {
             if (gameManager == null)
             {
-                Debug.LogError("GameManager not found in the scene!");
+                Debug.LogError("GameManager not found! Please set it using SetGameManager.");
                 return;
             }
         
