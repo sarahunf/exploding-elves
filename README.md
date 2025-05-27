@@ -5,8 +5,8 @@ Exploding Elves is a Unity-based simulation/game project featuring autonomous el
 ## Project Overview
 - **Entities:** The main actors are elves, each with their own state and behaviors.
 - **Spawning:** Elves are spawned via configurable spawners and can replicate under certain conditions.
-- **Interaction:** Elves interact with each other and the environment, including collisions and explosions.
-- **UI:** The game features a UI for pausing, restarting, and quitting, following a clear separation of concerns.
+- **Interaction:** Elves interact with each other and the environment, including collisions, explosions and replication.
+- **UI:** The game features a UI for pausing, restarting, and quitting, following a clear separation of concerns and a UI for controlling actors behavior.
 
 ## Key Design Patterns
 
@@ -32,6 +32,13 @@ Exploding Elves is a Unity-based simulation/game project featuring autonomous el
 - **Location:** `Assets/Scripts/Actors/StateMachine/`
 - **Usage:** `ElfStateMachine` manages the state transitions (Spawning, Idle, Replicating, Exploding) for each elf, controlling their behavior and effects.
 - **Benefit:** Organizes complex entity behavior into manageable, extensible states.
+
+### Componentization Pattern
+- **Location:** `Assets/Scripts/Actors/Components/`
+- **Usage:** Actor behaviors are split into modular components (e.g., `CollisionHandler`, `MovementComponent`, `ParticleEffectHandler`), each responsible for a single aspect of functionality.
+- **Benefit:** Decouples responsibilities into maintainable units. Enhances code reusability, scalability, and testability. Makes it easy to add, remove, or swap functionality without affecting unrelated systems. Useful for feature toggling, dynamic actor configuration, and simplifying complex monolithic classes.
+
+
 
 ## Extending the Project
 - Add new entity types by extending the factory and state machine.
