@@ -49,6 +49,7 @@ namespace Manager
                     elf.ShowSpawnEffect(spawnPosition.Value);
                 }
                 EntityCounter.Instance.OnEntitySpawned(entityType);
+                Spawner.Spawner.TriggerEntitySpawned(entityType);
             }
             else
             {

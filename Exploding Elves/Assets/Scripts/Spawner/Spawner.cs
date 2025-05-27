@@ -19,6 +19,11 @@ namespace Spawner
         private float currentSpawnTimer;
     
         public static event System.Action<EntityType> OnEntitySpawned;
+
+        public static void TriggerEntitySpawned(EntityType entityType)
+        {
+            OnEntitySpawned?.Invoke(entityType);
+        }
     
         public static Vector3? GetValidSpawnPosition(Vector3 basePosition, float areaSize)
         {
@@ -121,7 +126,7 @@ namespace Spawner
             
             entity.Initialize(spawnPosition.Value);
             EntityCounter.Instance.OnEntitySpawned(_configSo.entityType);
-            OnEntitySpawned?.Invoke(_configSo.entityType);
+            TriggerEntitySpawned(_configSo.entityType);
         }
 
         public void SetSpawnInterval(float interval)
