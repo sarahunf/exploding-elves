@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 3197187093432742725}
   - component: {fileID: 8006212391110340050}
   - component: {fileID: 8804347697731750684}
+  - component: {fileID: 4398252617088288170}
+  - component: {fileID: 158952366308619827}
   m_Layer: 0
   m_Name: ElfBase
   m_TagString: Untagged
@@ -99,6 +101,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f8b4203f0bdc2734db5a6d380a8c2083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4398252617088288170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6021987723304765930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5e689463bc60f4b9ed761885db4bfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &158952366308619827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6021987723304765930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71dddc862affd674f97479e3f43264f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &7591237913662246887

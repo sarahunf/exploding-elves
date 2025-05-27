@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using Actors.Enum;
 using Actors.Interface;
 using Actors.StateMachine;
 using Actors.Pool;
+using Actors.Components;
 using Config;
 using UnityEngine;
 using UnityEngine.Serialization;
 using IPool = Actors.Pool.IPool;
 using IPoolable = Actors.Pool.IPoolable;
-
 
 namespace Actors
 {
@@ -18,14 +16,12 @@ namespace Actors
     {
         [FormerlySerializedAs("config")] [SerializeField] private ElfConfigSO _configSo;
         [SerializeField] private SpiderElfView view;
-        private ParticlePool explosionPool;
-        private ParticlePool spawningPool;
+        
         private MovementComponent movementComponent;
         private ElfStateMachine stateMachine;
-        
+        private CollisionHandler collisionHandler;
+        private ParticleEffectHandler particleHandler;
         private IPool pool;
-        private static HashSet<(int, int)> processedCollisions = new HashSet<(int, int)>();
-        private static float lastCleanupTime = 0f;
         
         public static event Action<EntityType, Vector3> OnElfReplication;
         public static event Action<EntityType> OnEntityDestroyed;
@@ -34,23 +30,18 @@ namespace Actors
         {
             entityType = _configSo.type;
             movementComponent = GetComponent<MovementComponent>();
+            collisionHandler = GetComponent<CollisionHandler>();
+            particleHandler = GetComponent<ParticleEffectHandler>();
             stateMachine = new ElfStateMachine(this);
         }
 
         public void InitializePools(ParticlePool explosionPool, ParticlePool spawningPool)
         {
-            this.explosionPool = explosionPool;
-            this.spawningPool = spawningPool;
+            particleHandler.InitializePools(explosionPool, spawningPool);
         }
 
         private void Update()
         {
-            if (Time.time - lastCleanupTime > _configSo.collisionCleanupInterval)
-            {
-                processedCollisions.Clear();
-                lastCleanupTime = Time.time;
-            }
-
             stateMachine.Update();
         }
         
@@ -62,7 +53,7 @@ namespace Actors
             
             if (Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out var hit, 1f))
             {
-                Vector3 newPos = new Vector3(transform.position.x, hit.point.y + 0.1f, transform.position.z);
+                var newPos = new Vector3(transform.position.x, hit.point.y + 0.1f, transform.position.z);
                 transform.position = newPos;
             }
         }
@@ -70,85 +61,7 @@ namespace Actors
         public override void OnCollision(IEntity other)
         {
             base.OnCollision(other);
-            if (!stateMachine.CanReplicate())
-            { 
-                return;
-            }
-
-            var otherElf = other as Elf;
-            if (otherElf == null)
-            { 
-                return;
-            }
-            
-            int id1 = gameObject.GetInstanceID();
-            int id2 = otherElf.gameObject.GetInstanceID();
-            var collisionId = (Mathf.Min(id1, id2), Mathf.Max(id1, id2));
-            
-            if (!processedCollisions.Add(collisionId))
-            {
-                return;
-            }
-            
-            if (other.GetEntityType() == entityType)
-            {
-                OnElfReplication?.Invoke(entityType, transform.position);
-                
-                stateMachine.SetState(ElfState.Replicating, _configSo.replicationCooldown);
-                otherElf.stateMachine.SetState(ElfState.Replicating, _configSo.replicationCooldown);
-            }
-            else
-            {
-                Explode();
-                otherElf.Explode();
-            }
-            StartCoroutine(RemoveCollisionId(collisionId));
-        }
-
-        private IEnumerator RemoveCollisionId((int, int) collisionId)
-        {
-            yield return new WaitForSeconds(0.1f);
-            if (processedCollisions.Contains(collisionId))
-            {
-                processedCollisions.Remove(collisionId);
-            }
-        }
-
-        private void Explode()
-        {
-            if (stateMachine.GetCurrentState() == ElfState.Exploding) return;
-            
-            stateMachine.SetState(ElfState.Exploding);
-
-            if (explosionPool != null)
-            {
-                var explosion = explosionPool.Get();
-                if (explosion != null)
-                {
-                    explosion.transform.position = transform.position;
-                    var ps = explosion.GetComponent<ParticleSystem>();
-                    if (ps != null)
-                    {
-                        var main = ps.main;
-                        ps.Play();
-                        explosionPool.ReturnToPoolAfterDuration(explosion, (main.duration + main.startDelay.constant) + 0.2f);
-                    }
-                }
-            }
-            
-            StartCoroutine(DelayedReturn());
-        }
-
-        private IEnumerator DelayedReturn()
-        {
-            yield return null;
-            if (stateMachine.GetCurrentState() != ElfState.Exploding) yield break;
-            
-            Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
-            OnEntityDestroyed?.Invoke(entityType);
-                
-            stateMachine.SetState(ElfState.Spawning, 2f);
-            ReturnToPool();
+            collisionHandler.HandleCollision(other);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -163,7 +76,7 @@ namespace Actors
                 {
                     if (other.CompareTag("Rock"))
                     {
-                        HandleRockCollision(other);
+                        collisionHandler.HandleRockCollision(other);
                     }
                     return;
                 }
@@ -172,18 +85,31 @@ namespace Actors
             OnCollision(otherElf);
         }
 
-        private void HandleRockCollision(Collider rock)
+        public void HandleReplication()
         {
-            if (movementComponent == null) return;
+            OnElfReplication?.Invoke(entityType, transform.position);
+            stateMachine.SetState(ElfState.Replicating, _configSo.replicationCooldown);
+        }
 
-            var collisionNormal = (transform.position - rock.transform.position).normalized;
-            var currentDirection = movementComponent.GetCurrentDirection();
-            float yDirection = currentDirection.y;
-            var newDirection = Vector3.Reflect(currentDirection, collisionNormal);
-            newDirection.y = yDirection;
-            movementComponent.SetDirection(newDirection);
-            movementComponent.SetNextDirectionChangeTime(Time.time + _configSo.randomDirectionChangeInterval);
-            transform.position += newDirection * 0.1f;
+        public void Explode()
+        {
+            if (stateMachine.GetCurrentState() == ElfState.Exploding) return;
+            
+            stateMachine.SetState(ElfState.Exploding);
+            particleHandler.ShowExplosionEffect();
+            StartCoroutine(DelayedReturn());
+        }
+
+        private System.Collections.IEnumerator DelayedReturn()
+        {
+            yield return null;
+            if (stateMachine.GetCurrentState() != ElfState.Exploding) yield break;
+            
+            Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
+            OnEntityDestroyed?.Invoke(entityType);
+                
+            stateMachine.SetState(ElfState.Spawning, 2f);
+            ReturnToPool();
         }
         
         public void SetPool(IPool pool)
@@ -201,22 +127,11 @@ namespace Actors
         
         public void ShowSpawnEffect(Vector3 position)
         {
-            if (spawningPool == null) return;
-            
-            var spawnEffect = spawningPool.Get();
-            if (spawnEffect == null) return;
-                
-            spawnEffect.transform.position = position;
-            var ps = spawnEffect.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                var main = ps.main;
-                ps.Play();
-                spawningPool.ReturnToPoolAfterDuration(spawnEffect, (main.duration + main.startDelay.constant) + 0.2f);
-            }
+            particleHandler.ShowSpawnEffect(position);
         }
         
         public ElfConfigSO GetConfig() => _configSo;
         public SpiderElfView GetView() => view;
+        public bool CanReplicate() => stateMachine.CanReplicate();
     }
 }
