@@ -12,11 +12,7 @@ namespace Actors.Movement
         
         public virtual Quaternion CalculateRotation(Vector3 movement)
         {
-            if (movement != Vector3.zero)
-            {
-                return Quaternion.LookRotation(movement);
-            }
-            return Quaternion.identity;
+            return movement != Vector3.zero ? Quaternion.LookRotation(movement) : Quaternion.identity;
         }
     }
 } 

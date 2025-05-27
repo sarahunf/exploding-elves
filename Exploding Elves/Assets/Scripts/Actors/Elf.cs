@@ -69,6 +69,7 @@ namespace Actors
         
         public override void OnCollision(IEntity other)
         {
+            base.OnCollision(other);
             if (!stateMachine.CanReplicate())
             { 
                 return;
@@ -125,11 +126,11 @@ namespace Actors
                 if (explosion != null)
                 {
                     explosion.transform.position = transform.position;
-                    var particleSystem = explosion.GetComponent<ParticleSystem>();
-                    if (particleSystem != null)
+                    var ps = explosion.GetComponent<ParticleSystem>();
+                    if (ps != null)
                     {
-                        var main = particleSystem.main;
-                        particleSystem.Play();
+                        var main = ps.main;
+                        ps.Play();
                         explosionPool.ReturnToPoolAfterDuration(explosion, (main.duration + main.startDelay.constant) + 0.2f);
                     }
                 }
@@ -141,15 +142,13 @@ namespace Actors
         private IEnumerator DelayedReturn()
         {
             yield return null;
+            if (stateMachine.GetCurrentState() != ElfState.Exploding) yield break;
             
-            if (stateMachine.GetCurrentState() == ElfState.Exploding)
-            {
-                Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
-                OnEntityDestroyed?.Invoke(entityType);
+            Manager.EntityCounter.Instance.OnEntityDestroyed(entityType);
+            OnEntityDestroyed?.Invoke(entityType);
                 
-                stateMachine.SetState(ElfState.Spawning, 2f);
-                ReturnToPool();
-            }
+            stateMachine.SetState(ElfState.Spawning, 2f);
+            ReturnToPool();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -177,10 +176,10 @@ namespace Actors
         {
             if (movementComponent == null) return;
 
-            Vector3 collisionNormal = (transform.position - rock.transform.position).normalized;
-            Vector3 currentDirection = movementComponent.GetCurrentDirection();
+            var collisionNormal = (transform.position - rock.transform.position).normalized;
+            var currentDirection = movementComponent.GetCurrentDirection();
             float yDirection = currentDirection.y;
-            Vector3 newDirection = Vector3.Reflect(currentDirection, collisionNormal);
+            var newDirection = Vector3.Reflect(currentDirection, collisionNormal);
             newDirection.y = yDirection;
             movementComponent.SetDirection(newDirection);
             movementComponent.SetNextDirectionChangeTime(Time.time + _configSo.randomDirectionChangeInterval);
@@ -208,11 +207,11 @@ namespace Actors
             if (spawnEffect == null) return;
                 
             spawnEffect.transform.position = position;
-            var particleSystem = spawnEffect.GetComponent<ParticleSystem>();
-            if (particleSystem != null)
+            var ps = spawnEffect.GetComponent<ParticleSystem>();
+            if (ps != null)
             {
-                var main = particleSystem.main;
-                particleSystem.Play();
+                var main = ps.main;
+                ps.Play();
                 spawningPool.ReturnToPoolAfterDuration(spawnEffect, (main.duration + main.startDelay.constant) + 0.2f);
             }
         }

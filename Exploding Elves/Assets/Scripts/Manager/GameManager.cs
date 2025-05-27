@@ -75,13 +75,10 @@ namespace Manager
             if (spawnPosition.HasValue)
             {
                 newElf.Initialize(spawnPosition.Value);
-                
-                // Show spawn effect
                 if (newElf is Elf elf)
                 {
                     elf.ShowSpawnEffect(spawnPosition.Value);
                 }
-                
                 EntityCounter.Instance.OnEntitySpawned(entityType);
             }
             else
@@ -123,9 +120,7 @@ namespace Manager
 
         public void RestartGame()
         {
-            // Reset time scale in case the game was paused
             Time.timeScale = 1f;
-            // Reload the current scene
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
 

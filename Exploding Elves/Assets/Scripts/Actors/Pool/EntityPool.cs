@@ -34,13 +34,10 @@ namespace Actors.Pool
 
         private GameObject CreateNew()
         {
-            GameObject go = Instantiate(prefab, transform);
+            var go = Instantiate(prefab, transform);
             go.SetActive(false);
             var poolable = go.GetComponent<IPoolable>();
-            if (poolable != null)
-            {
-                poolable.SetPool(this);
-            }
+            poolable?.SetPool(this);
             return go;
         }
 

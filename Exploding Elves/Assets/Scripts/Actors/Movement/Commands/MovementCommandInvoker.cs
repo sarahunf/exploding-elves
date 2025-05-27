@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Actors.Movement.Commands
 {
@@ -20,11 +19,7 @@ namespace Actors.Movement.Commands
             {
                 var command = commandQueue.Dequeue();
                 command.Execute();
-                
-                // Add to history for potential undo
                 commandHistory.Push(command);
-                
-                // Maintain history size
                 if (commandHistory.Count > maxHistorySize)
                 {
                     commandHistory.Pop();

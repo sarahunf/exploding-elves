@@ -39,7 +39,6 @@ namespace UI
             }
         }
         
-
         private void StartAnimation()
         {
             if (!shouldAnimate) return;

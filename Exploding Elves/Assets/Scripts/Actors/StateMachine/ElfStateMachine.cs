@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using Actors.Enum;
-using Config;
 
 namespace Actors.StateMachine
 {

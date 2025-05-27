@@ -21,10 +21,6 @@ namespace UI
         private void Awake()
         {
             gameManager = FindObjectOfType<GameManager>();
-            if (gameManager == null)
-            {
-                return;
-            }
         }
 
         private void OnEnable()

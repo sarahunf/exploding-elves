@@ -55,7 +55,7 @@ namespace Actors.Movement
                 noTargetTimer = 0f;
             }
             
-            Vector3 targetDirection = GetTargetDirection(currentPosition, currentDirection);
+            var targetDirection = GetTargetDirection(currentPosition, currentDirection);
             float currentSpeed = isCharging ? chargeSpeed : moveSpeed;
             
             UpdateChargeState(deltaTime);
@@ -102,7 +102,7 @@ namespace Actors.Movement
         
         private void FindNewTarget(Vector3 currentPosition)
         {
-            Collider[] nearbyColliders = Physics.OverlapSphere(currentPosition, detectionRadius);
+            var nearbyColliders = Physics.OverlapSphere(currentPosition, detectionRadius);
             float closestDistance = float.MaxValue;
             Elf closestTarget = null;
 
@@ -137,7 +137,7 @@ namespace Actors.Movement
             
             if (lastKnownTargetPosition != Vector3.zero)
             {
-                Vector3 direction = (lastKnownTargetPosition - currentPosition).normalized;
+                var direction = (lastKnownTargetPosition - currentPosition).normalized;
                 if (Vector3.Distance(currentPosition, lastKnownTargetPosition) < 0.5f)
                 {
                     lastKnownTargetPosition = Vector3.zero;
@@ -160,11 +160,7 @@ namespace Actors.Movement
         
         public override Quaternion CalculateRotation(Vector3 movement)
         {
-            if (movement != Vector3.zero)
-            {
-                return Quaternion.LookRotation(movement);
-            }
-            return Quaternion.identity;
+            return movement != Vector3.zero ? Quaternion.LookRotation(movement) : Quaternion.identity;
         }
     }
 } 

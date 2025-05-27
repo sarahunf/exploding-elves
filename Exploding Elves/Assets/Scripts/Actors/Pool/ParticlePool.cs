@@ -28,18 +28,17 @@ namespace Actors.Pool
         
         private void Awake()
         {
-            if (prefab != null)
+            if (prefab == null) return;
+            
+            for (int i = 0; i < initialSize; i++)
             {
-                for (int i = 0; i < initialSize; i++)
-                {
-                    AddToPool(CreateNew());
-                }
+                AddToPool(CreateNew());
             }
         }
 
         private GameObject CreateNew()
         {
-            GameObject go = Instantiate(prefab, transform);
+            var go = Instantiate(prefab, transform);
             go.SetActive(false);
             return go;
         }

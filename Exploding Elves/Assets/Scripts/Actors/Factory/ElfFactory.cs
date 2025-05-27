@@ -35,7 +35,7 @@ namespace Actors.Factory
                 return null;
             }
 
-            GameObject obj = pool.Get();
+            var obj = pool.Get();
             var entity = obj.GetComponent<IEntity>();
             
             if (entity is Elf elf)

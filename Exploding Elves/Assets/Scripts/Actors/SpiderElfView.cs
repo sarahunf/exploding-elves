@@ -49,7 +49,7 @@ namespace Actors
         {
             if (spiderRenderer != null)
             {
-                Material bodyMaterial = spiderRenderer.materials[0];
+                var bodyMaterial = spiderRenderer.materials[0];
                 if (isSpawning)
                 {
                     bodyMaterial.EnableKeyword("_EMISSION");
@@ -64,7 +64,7 @@ namespace Actors
 
         public void SetScale(bool canReplicate)
         {
-            Vector3 targetScale = canReplicate ? normalScale : normalScale * SPAWN_SCALE;
+            var targetScale = canReplicate ? normalScale : normalScale * SPAWN_SCALE;
             transform.DOScale(targetScale, SCALE_DURATION).SetEase(Ease.OutBack);
         }
         

@@ -1,4 +1,3 @@
-using Actors.Movement;
 using Actors.Movement.Commands;
 using Config;
 using UnityEngine;
@@ -13,15 +12,9 @@ namespace Actors
         private float nextDirectionChangeTime;
         private Vector3 lastPosition;
         private MovementCommandInvoker commandInvoker;
-        
-        // Cached vectors to reduce GC
-        private readonly Vector3 upOffset = new Vector3(0, 0.1f, 0);
-        private readonly Vector3 raycastOffset = new Vector3(0, 0.5f, 0);
         private Vector3 tempPosition;
         private Vector3 tempDirection;
         private Vector3 tempReflection;
-        
-        // Boundary constraints
         private const float BOUNDARY_MARGIN = 0.5f;
         private float minX, maxX, minZ, maxZ;
         
@@ -50,8 +43,7 @@ namespace Actors
                     minZ = Mathf.Min(minZ, bounds.min.z);
                     maxZ = Mathf.Max(maxZ, bounds.max.z);
                 }
-
-                // Add margin to boundaries
+                
                 minX += BOUNDARY_MARGIN;
                 maxX -= BOUNDARY_MARGIN;
                 minZ += BOUNDARY_MARGIN;
@@ -59,7 +51,6 @@ namespace Actors
             }
             else
             {
-                // Fallback boundaries if no rocks found
                 minX = -50f;
                 maxX = 50f;
                 minZ = -50f;
@@ -79,21 +70,12 @@ namespace Actors
             var config = elf.GetConfig();
             tempPosition = transform.position;
 
-            if (config.movementStrategy == null)
-            {
-                tempPosition = CalculateDefaultMovement(config);
-            }
-            else
-            {
-                tempPosition = CalculateStrategyMovement(config);
-            }
+            tempPosition = config.movementStrategy == null ? CalculateDefaultMovement(config) : CalculateStrategyMovement(config);
             
-            // Apply boundary constraints and ground height
             tempPosition = ConstrainToBoundaries(tempPosition);
             tempPosition = AdjustGroundHeight(tempPosition);
             
-            // Create and queue movement command
-            Quaternion targetRotation = config.movementStrategy?.CalculateRotation(tempPosition - transform.position) 
+            var targetRotation = config.movementStrategy?.CalculateRotation(tempPosition - transform.position) 
                 ?? Quaternion.LookRotation(tempPosition - transform.position);
             
             var moveCommand = new MoveCommand(this, tempPosition, targetRotation);
@@ -145,7 +127,7 @@ namespace Actors
         {
             if (position.x < minX || position.x > maxX || position.z < minZ || position.z > maxZ)
             {
-                Vector3 reflection = Vector3.zero;
+                var reflection = Vector3.zero;
                 
                 if (position.x < minX)
                 {

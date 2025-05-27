@@ -22,8 +22,5 @@ namespace Config
         public EntityType type;
         [FormerlySerializedAs("color")] public Color highlight;
         public Color body;
-        
-        [Header("Pool Settings")]
-        public int initialPoolSize = 10;
     }
 } 

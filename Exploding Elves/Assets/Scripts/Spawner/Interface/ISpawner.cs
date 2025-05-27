@@ -1,6 +1,4 @@
-﻿using Actors.Enum;
-
-namespace Spawner.Interface
+﻿namespace Spawner.Interface
 {
     public interface ISpawner
     {
